@@ -20,14 +20,14 @@ set "DRIVES=C A B D E F G H I J K L M N O P Q R S T U V W X Y Z"
 :MAIN_MENU
 cls
 echo ===================================================
-echo       ULTIMATE FIREWALL ACTIVATION MANAGER
+echo     ULTIMATE FIREWALL AND EA OFFLINE MANAGER
 echo ===================================================
 echo.
 echo  [1] Block Steam 
 echo  [2] Block Ubisoft 
 echo  [3] Block Epic Games 
 echo  [4] Block Rockstar Launcher 
-echo  [5] Block EA App 
+echo  [5] Block EA (Adapter Offline Method)
 echo  [6] Block Custom Game Directory (Manual Folder Prompt)
 echo  [7] Clear Firewall Rules (Unblock Options)
 echo  [8] Exit
@@ -39,14 +39,15 @@ if "%CHOICE%"=="1" goto BLOCK_STEAM
 if "%CHOICE%"=="2" goto BLOCK_UBI
 if "%CHOICE%"=="3" goto BLOCK_EPIC
 if "%CHOICE%"=="4" goto BLOCK_ROCKSTAR
-if "%CHOICE%"=="5" goto BLOCK_EA
+if "%CHOICE%"=="5" goto EA_ADAPTER_MENU
 if "%CHOICE%"=="6" goto BLOCK_CUSTOM
 if "%CHOICE%"=="7" goto CLEAR_MENU
 if "%CHOICE%"=="8" exit
 goto MAIN_MENU
 
+
 :: ===================================================
-:: BLOCKING LOGIC
+:: FIREWALL BLOCKING LOGIC
 :: ===================================================
 
 :BLOCK_STEAM
@@ -254,65 +255,10 @@ pause
 goto MAIN_MENU
 
 
-:BLOCK_EA
-cls
-echo Scanning drives for EA App...
-set "EA_MAIN="
-set "EA_ORIGIN="
-
-for %%d in (%DRIVES%) do (
-    if not defined EA_MAIN (
-        if exist "%%d:\Program Files\Electronic Arts\EA Desktop\EA Desktop" (
-            set "EA_MAIN=%%d:\Program Files\Electronic Arts\EA Desktop\EA Desktop"
-        )
-    )
-    if not defined EA_ORIGIN (
-        if exist "%%d:\Program Files (x86)\Origin Games" (
-            set "EA_ORIGIN=%%d:\Program Files (x86)\Origin Games"
-        )
-    )
-)
-
-if not defined EA_MAIN (
-    echo [WARNING] EA App Launcher could not be found automatically.
-    set /p "EA_MAIN=Enter your EA Desktop\EA Desktop folder path: "
-)
-
-echo.
-echo Processing EA App folders... Please wait.
-if exist "%EA_MAIN%" (
-    for /r "%EA_MAIN%" %%i in (*.exe) do (
-        netsh advfirewall firewall add rule name="Offline_EA_Block" dir=out action=block program="%%i" enable=yes >nul 2>&1
-        netsh advfirewall firewall add rule name="Offline_EA_Block" dir=in action=block program="%%i" enable=yes >nul 2>&1
-    )
-)
-if exist "%EA_ORIGIN%" (
-    for /r "%EA_ORIGIN%" %%i in (*.exe) do (
-        netsh advfirewall firewall add rule name="Offline_EA_Block" dir=out action=block program="%%i" enable=yes >nul 2>&1
-        netsh advfirewall firewall add rule name="Offline_EA_Block" dir=in action=block program="%%i" enable=yes >nul 2>&1
-    )
-)
-if exist "C:\ProgramData\EA Desktop" (
-    for /r "C:\ProgramData\EA Desktop" %%i in (*.exe) do (
-        netsh advfirewall firewall add rule name="Offline_EA_Block" dir=out action=block program="%%i" enable=yes >nul 2>&1
-        netsh advfirewall firewall add rule name="Offline_EA_Block" dir=in action=block program="%%i" enable=yes >nul 2>&1
-    )
-)
-if exist "%LOCALAPPDATA%\Electronic Arts\EA Desktop" (
-    for /r "%LOCALAPPDATA%\Electronic Arts\EA Desktop" %%i in (*.exe) do (
-        netsh advfirewall firewall add rule name="Offline_EA_Block" dir=out action=block program="%%i" enable=yes >nul 2>&1
-        netsh advfirewall firewall add rule name="Offline_EA_Block" dir=in action=block program="%%i" enable=yes >nul 2>&1
-    )
-)
-echo [SUCCESS] EA App folders successfully isolated!
-pause
-goto MAIN_MENU
-
-
 :BLOCK_CUSTOM
 cls
 echo ===================================================
-echo          CUSTOM GAME DIRECTORY BLOCKER (FAB MODE)
+echo          CUSTOM GAME DIRECTORY BLOCKER
 echo ===================================================
 echo.
 :CUSTOM_PROMPT
@@ -335,8 +281,146 @@ if exist "%CUSTOM_DIR%" (
 pause
 goto MAIN_MENU
 
+
 :: ===================================================
-:: UNBLOCKING LOGIC
+:: EA ADAPTER OFFLINE SUB-MENU & SYSTEM (Merged)
+:: ===================================================
+
+:EA_ADAPTER_MENU
+cls
+echo ===================================================
+echo             EA APP AUTOMATED OFFLINE TOOL
+echo ===================================================
+echo  1. Launch EA + Game in Strict Offline Loop
+echo  2. Clear / Reset (Force Kill Running Instances)
+echo  3. Back to Main Menu
+echo ===================================================
+echo.
+set /p adapter_choice="Choose an option (1-3): "
+
+if "%adapter_choice%"=="1" goto LAUNCH_OFFLINE
+if "%adapter_choice%"=="2" goto FORCE_CLEANUP
+if "%adapter_choice%"=="3" goto MAIN_MENU
+goto EA_ADAPTER_MENU
+
+
+:LAUNCH_OFFLINE
+cls
+echo ===================================================
+echo          CONFIGURING TARGET GAME CODENAME
+echo ===================================================
+echo Look at your game's shortcut or Task Manager to find its .exe name.
+echo Examples: bf3.exe, DA2.exe, FIFA23.exe
+echo.
+set /p "GAME_EXE=Enter the exact game executable name (e.g., bf3.exe): "
+
+if "%GAME_EXE%"=="" (
+    echo [ERROR] Game executable name cannot be empty.
+    pause
+    goto EA_ADAPTER_MENU
+)
+
+cls
+echo ===================================================
+echo          INITIALIZING ZERO-CONNECTION BOOT
+echo ===================================================
+echo.
+
+echo 1. Stripping lingering EA processes...
+taskkill /f /im EADesktop.exe >nul 2>&1
+taskkill /f /im EABackgroundService.exe >nul 2>&1
+taskkill /f /im Link2EA.exe >nul 2>&1
+taskkill /f /im "%GAME_EXE%" >nul 2>&1
+
+echo 2. Locating EA App Installation...
+set "EA_LAUNCHER_EXE="
+for %%d in (C D E F G H) do (
+    if not defined EA_LAUNCHER_EXE (
+        if exist "%%d:\Program Files\Electronic Arts\EA Desktop\EA Desktop\EADesktop.exe" (
+            set "EA_LAUNCHER_EXE=%%d:\Program Files\Electronic Arts\EA Desktop\EA Desktop\EADesktop.exe"
+        )
+    )
+)
+
+if not defined EA_LAUNCHER_EXE (
+    echo [ERROR] EA Launcher path not found automatically.
+    pause
+    goto EA_ADAPTER_MENU
+)
+
+echo 3. Simulating physical hardware isolation (Adapters OFF)...
+netsh interface set interface "Wi-Fi" disable >nul 2>&1
+netsh interface set interface "Ethernet" disable >nul 2>&1
+timeout /t 2 /nobreak >nul
+
+echo 4. Forcing true offline launcher fallback...
+sc config "EABackgroundService" start= demand >nul 2>&1
+sc start "EABackgroundService" >nul 2>&1
+start "" "%EA_LAUNCHER_EXE%"
+
+echo.
+echo ===================================================
+echo STEP 5: ACTION REQUIRED
+echo ===================================================
+echo 1. The EA App will open completely offline.
+echo 2. Click and LAUNCH your game now from the library.
+echo 3. Return to this window ONLY AFTER your game has fully booted up.
+echo.
+pause
+
+echo.
+echo 6. Game running! Restoring PC internet access (Adapters ON)...
+netsh interface set interface "Wi-Fi" enable >nul 2>&1
+netsh interface set interface "Ethernet" enable >nul 2>&1
+
+echo.
+echo ===================================================
+echo      MONITORING GAMEPLAY - DO NOT CLOSE WINDOW
+echo ===================================================
+echo Tracking %GAME_EXE%... 
+echo The moment you close the game, EA will be wiped instantly 
+echo to prevent the online screen shown in image_435fdd.png.
+echo.
+
+:MONITOR_LOOP
+timeout /t 2 /nobreak >nul
+tasklist /fi "IMAGENAME eq %GAME_EXE%" 2>nul | find /i "%GAME_EXE%" >nul
+if %errorlevel% equ 0 goto MONITOR_LOOP
+
+goto AUTO_CLEANUP
+
+
+:AUTO_CLEANUP
+echo.
+echo Game exit detected! Force killing EA processes immediately...
+taskkill /f /im EADesktop.exe >nul 2>&1
+taskkill /f /im EABackgroundService.exe >nul 2>&1
+taskkill /f /im Link2EA.exe >nul 2>&1
+echo [SUCCESS] Session wiped clean before EA could reconnect.
+timeout /t 3 >nul
+goto EA_ADAPTER_MENU
+
+
+:FORCE_CLEANUP
+cls
+echo ===================================================
+echo             EMERGENCY FORCE-EXIT RESET
+echo ===================================================
+echo.
+echo Restoring network hardware and destroying all tasks...
+netsh interface set interface "Wi-Fi" enable >nul 2>&1
+netsh interface set interface "Ethernet" enable >nul 2>&1
+taskkill /f /im EADesktop.exe >nul 2>&1
+taskkill /f /im EABackgroundService.exe >nul 2>&1
+taskkill /f /im Link2EA.exe >nul 2>&1
+if defined GAME_EXE taskkill /f /im "%GAME_EXE%" >nul 2>&1
+echo.
+echo [CLEANUP COMPLETE] System state default.
+pause
+goto EA_ADAPTER_MENU
+
+:: ===================================================
+:: FIREWALL UNBLOCKING LOGIC
 :: ===================================================
 
 :CLEAR_MENU
@@ -345,22 +429,20 @@ echo ===================================================
 echo               UNBLOCK / CLEAR MENU
 echo ===================================================
 echo.
-echo  [1] Unblock Steam          [4] Unblock Rockstar
-echo  [2] Unblock Ubisoft        [5] Unblock EA App
-echo  [3] Unblock Epic Games     [6] Unblock Custom Folder Rules
-echo  [7] UNBLOCK ALL CLIENTS
-echo  [8] Back to Main Menu
+echo  [1] Unblock Steam          [5] Unblock Custom Folder Rules
+echo  [2] Unblock Ubisoft        [6] UNBLOCK ALL CLIENTS
+echo  [3] Unblock Epic Games     [7] Back to Main Menu
+echo  [4] Unblock Rockstar
 echo.
 echo ===================================================
-set /p "CLEAR_CHOICE=Select an option (1-8): "
+set /p "CLEAR_CHOICE=Select an option (1-7): "
 
 if "%CLEAR_CHOICE%"=="1" netsh advfirewall firewall delete rule name="Offline_Steam_Block" >nul 2>&1 & echo Steam restored! & pause
 if "%CLEAR_CHOICE%"=="2" netsh advfirewall firewall delete rule name="Offline_Ubi_Block" >nul 2>&1 & echo Ubisoft restored! & pause
 if "%CLEAR_CHOICE%"=="3" netsh advfirewall firewall delete rule name="Offline_Epic_Block" >nul 2>&1 & echo Epic restored! & pause
 if "%CLEAR_CHOICE%"=="4" netsh advfirewall firewall delete rule name="Offline_Rockstar_Block" >nul 2>&1 & echo Rockstar restored! & pause
-if "%CLEAR_CHOICE%"=="5" netsh advfirewall firewall delete rule name="Offline_EA_Block" >nul 2>&1 & echo EA App restored! & pause
-if "%CLEAR_CHOICE%"=="6" netsh advfirewall firewall delete rule name="Offline_Custom_Block" >nul 2>&1 & echo Custom rules cleared! & pause
-if "%CLEAR_CHOICE%"=="7" goto CLEAR_ALL
+if "%CLEAR_CHOICE%"=="5" netsh advfirewall firewall delete rule name="Offline_Custom_Block" >nul 2>&1 & echo Custom rules cleared! & pause
+if "%CLEAR_CHOICE%"=="6" goto CLEAR_ALL
 goto MAIN_MENU
 
 :CLEAR_ALL
@@ -370,9 +452,9 @@ netsh advfirewall firewall delete rule name="Offline_Steam_Block" >nul 2>&1
 netsh advfirewall firewall delete rule name="Offline_Ubi_Block" >nul 2>&1
 netsh advfirewall firewall delete rule name="Offline_Epic_Block" >nul 2>&1
 netsh advfirewall firewall delete rule name="Offline_Rockstar_Block" >nul 2>&1
-netsh advfirewall firewall delete rule name="Offline_EA_Block" >nul 2>&1
 netsh advfirewall firewall delete rule name="Offline_Custom_Block" >nul 2>&1
 netsh advfirewall firewall delete rule name="Offline_Biz_Block" >nul 2>&1
+
 echo [SUCCESS] All clients and custom rules unblocked. Internet access completely restored!
 pause
 goto MAIN_MENU
