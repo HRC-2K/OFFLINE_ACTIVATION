@@ -25,7 +25,7 @@ function Show-MainMenu {
     Write-Host "===================================================" -ForegroundColor Cyan
     Write-Host "  1. Launch EA + Game in Strict Offline Loop"
     Write-Host "  2. Clear / Reset (Force Kill Running Instances)"
-    Write-Host "  3. Exit"
+    Write-Host "  3. Return"
     Write-Host "===================================================" -ForegroundColor Cyan
     Write-Host ""
 }
@@ -141,6 +141,6 @@ do {
     switch ($choice) {
         "1" { Invoke-EaLaunchOffline }
         "2" { Invoke-EaForceCleanup }
-        "3" { exit }
+        "3" { return }
     }
 } while ($true)

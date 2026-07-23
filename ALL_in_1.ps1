@@ -34,7 +34,7 @@ function Show-MainMenu {
     Write-Host " [5] Block EA (Adapter Offline Method)"
     Write-Host " [6] Block Custom Game Directory (Manual Folder Prompt)"
     Write-Host " [7] Clear Firewall Rules (Unblock Options)"
-    Write-Host " [8] Exit"
+    Write-Host " [8] Return"
     Write-Host ""
     Write-Host "===================================================" -ForegroundColor Cyan
 }
@@ -390,6 +390,6 @@ do {
         "5" { Show-EaAdapterMenu }
         "6" { Block-Custom }
         "7" { Show-ClearMenu }
-        "8" { exit }
+        "8" { return }
     }
 } while ($true)

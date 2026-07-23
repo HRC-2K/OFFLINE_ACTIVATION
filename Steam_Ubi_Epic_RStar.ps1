@@ -33,7 +33,7 @@ function Show-MainMenu {
     Write-Host " [4] Block Rockstar Launcher"
     Write-Host " [5] Block Custom Game Directory (Manual Folder Prompt)"
     Write-Host " [6] Clear Firewall Rules (Unblock Options)"
-    Write-Host " [7] Exit"
+    Write-Host " [7] Return"
     Write-Host ""
     Write-Host "===================================================" -ForegroundColor Cyan
 }
@@ -262,6 +262,6 @@ do {
         "4" { Block-Rockstar }
         "5" { Block-Custom }
         "6" { Show-ClearMenu }
-        "7" { exit }
+        "7" { return }
     }
 } while ($true)
