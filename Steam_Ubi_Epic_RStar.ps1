@@ -1,10 +1,11 @@
-# ==============================================================================
-# 1. AUTOMATIC ADMINISTRATOR ELEVATION
-# ==============================================================================
+# ===================================================
+# AUTOMATIC ADMINISTRATOR ELEVATION (UAC PROMPT)
+# ===================================================
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal = New-Object Security.Principal.WindowsPrincipal($identity)
 
 if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host "Requesting Administrator privileges..." -ForegroundColor Yellow
     $scriptPath = $MyInvocation.MyCommand.Path
     if ($scriptPath) {
         Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
@@ -17,16 +18,27 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
     exit
 }
 
-[System.Windows.Forms.Application]::EnableVisualStyles()
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-
-# Global Drive Configuration
+# Explicit drive order
 $DRIVES = @("C", "A", "B", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z")
 
-# ==============================================================================
-# 2. HELPER & BACKEND FUNCTIONS
-# ==============================================================================
+function Show-MainMenu {
+    Clear-Host
+    Write-Host "===================================================" -ForegroundColor Cyan
+    Write-Host "        ULTIMATE FIREWALL ACTIVATION MANAGER" -ForegroundColor Yellow
+    Write-Host "===================================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host " [1] Block Steam"
+    Write-Host " [2] Block Ubisoft"
+    Write-Host " [3] Block Epic Games"
+    Write-Host " [4] Block Rockstar Launcher"
+    Write-Host " [5] Block Custom Game Directory (Manual Folder Prompt)"
+    Write-Host " [6] Clear Firewall Rules (Unblock Options)"
+    Write-Host " [7] Return"
+    Write-Host ""
+    Write-Host "===================================================" -ForegroundColor Cyan
+}
+
+# Helper Function: Recursively adds inbound & outbound firewall rules for exes in a folder
 function Add-FirewallRulesForPath ($folderPath, $ruleName) {
     if (Test-Path $folderPath) {
         $exeFiles = Get-ChildItem -Path $folderPath -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue
@@ -37,282 +49,219 @@ function Add-FirewallRulesForPath ($folderPath, $ruleName) {
     }
 }
 
-function Prompt-TextInput ($title, $promptText) {
-    $inputForm = New-Object Windows.Forms.Form
-    $inputForm.Text = $title
-    $inputForm.Size = New-Object Drawing.Size(450, 180)
-    $inputForm.StartPosition = "CenterParent"
-    $inputForm.FormBorderStyle = "FixedDialog"
-    $inputForm.MaximizeBox = $false
+# ===================================================
+# BLOCKING LOGIC
+# ===================================================
 
-    $lbl = New-Object Windows.Forms.Label
-    $lbl.Text = $promptText
-    $lbl.Location = New-Object Drawing.Point(20, 15)
-    $lbl.Size = New-Object Drawing.Size(400, 20)
-    $inputForm.Controls.Add($lbl)
+function Block-Steam {
+    Clear-Host
+    Write-Host "Scanning drives for Steam (Checking C: first)..." -ForegroundColor Yellow
+    $steamPath = $null
+    $steamCommon = $null
+    $steamBin = $null
 
-    $tb = New-Object Windows.Forms.TextBox
-    $tb.Location = New-Object Drawing.Point(20, 45)
-    $tb.Size = New-Object Drawing.Size(390, 25)
-    $inputForm.Controls.Add($tb)
-
-    $btnOk = New-Object Windows.Forms.Button
-    $btnOk.Text = "OK"
-    $btnOk.Location = New-Object Drawing.Point(220, 85)
-    $btnOk.Size = New-Object Drawing.Size(90, 30)
-    $btnOk.DialogResult = [System.Windows.Forms.DialogResult]::OK
-    $inputForm.Controls.Add($btnOk)
-
-    $btnCancel = New-Object Windows.Forms.Button
-    $btnCancel.Text = "Cancel"
-    $btnCancel.Location = New-Object Drawing.Point(320, 85)
-    $btnCancel.Size = New-Object Drawing.Size(90, 30)
-    $btnCancel.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
-    $inputForm.Controls.Add($btnCancel)
-
-    $inputForm.AcceptButton = $btnOk
-    $inputForm.CancelButton = $btnCancel
-
-    if ($inputForm.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-        return $tb.Text.Trim()
+    foreach ($d in $DRIVES) {
+        if (-not $steamPath -and (Test-Path "$d`:\Program Files (x86)\Steam")) {
+            $steamPath = "$d`:\Program Files (x86)\Steam"
+            $steamBin = "$d`:\Program Files (x86)\Steam\bin"
+        }
+        if (-not $steamCommon -and (Test-Path "$d`:\Program Files (x86)\Common Files\Steam")) {
+            $steamCommon = "$d`:\Program Files (x86)\Common Files\Steam"
+        }
     }
-    return $null
+
+    if (-not $steamPath) {
+        Write-Host "[WARNING] Steam launcher files could not be found automatically." -ForegroundColor Red
+        $steamPath = Read-Host "Enter the correct Steam folder path (e.g., J:\Steam)"
+        $steamBin = Join-Path $steamPath "bin"
+    }
+    if (-not $steamCommon) { $steamCommon = "C:\Program Files (x86)\Common Files\Steam" }
+
+    Write-Host "`nProcessing Steam folders... Please wait." -ForegroundColor Cyan
+    Add-FirewallRulesForPath $steamPath "Offline_Steam_Block"
+    Add-FirewallRulesForPath $steamBin "Offline_Steam_Block"
+    Add-FirewallRulesForPath $steamCommon "Offline_Steam_Block"
+
+    Write-Host "[SUCCESS] Steam inbound and outbound rules successfully applied!" -ForegroundColor Green
+    Read-Host "Press Enter to return to main menu..."
 }
 
-# ==============================================================================
-# 3. SUB-WINDOW (CLEAR FIREWALL RULES MENU)
-# ==============================================================================
+function Block-Ubi {
+    Clear-Host
+    Write-Host "Scanning drives for Ubisoft (Checking C: first)..." -ForegroundColor Yellow
+    $ubiPath = $null
+
+    foreach ($d in $DRIVES) {
+        if (-not $ubiPath -and (Test-Path "$d`:\Program Files (x86)\Ubisoft")) {
+            $ubiPath = "$d`:\Program Files (x86)\Ubisoft"
+        }
+    }
+
+    if (-not $ubiPath) {
+        Write-Host "[WARNING] Ubisoft launcher files could not be found automatically." -ForegroundColor Red
+        $ubiPath = Read-Host "Enter the correct Ubisoft folder path"
+    }
+
+    Write-Host "`nProcessing Ubisoft folders... Please wait." -ForegroundColor Cyan
+    Add-FirewallRulesForPath $ubiPath "Offline_Ubi_Block"
+
+    Write-Host "[SUCCESS] Ubisoft inbound and outbound rules successfully applied!" -ForegroundColor Green
+    Read-Host "Press Enter to return to main menu..."
+}
+
+function Block-Epic {
+    Clear-Host
+    Write-Host "Scanning drives for Epic Games Launcher..." -ForegroundColor Yellow
+    $epicPath = $null
+
+    foreach ($d in $DRIVES) {
+        if (-not $epicPath -and (Test-Path "$d`:\Program Files (x86)\Epic Games")) {
+            $epicPath = "$d`:\Program Files (x86)\Epic Games"
+        }
+    }
+
+    if (-not $epicPath) {
+        Write-Host "[WARNING] Epic Games Launcher could not be found automatically." -ForegroundColor Red
+        $epicPath = Read-Host "Enter the correct Epic Games Launcher folder path"
+    }
+
+    Write-Host "`nProcessing Epic Games Launcher folders... Please wait." -ForegroundColor Cyan
+    Add-FirewallRulesForPath $epicPath "Offline_Epic_Block"
+
+    $localEpic = "$env:LOCALAPPDATA\EpicGamesLauncher"
+    if (Test-Path $localEpic) {
+        Write-Host "Processing WebHelper files..." -ForegroundColor Yellow
+        Add-FirewallRulesForPath $localEpic "Offline_Epic_Block"
+    }
+
+    $epicGameDir = "C:\Program Files\Epic Games"
+    if (Test-Path $epicGameDir) {
+        Write-Host "Found default Epic Games directory at C:\Program Files\Epic Games" -ForegroundColor Green
+    } else {
+        do {
+            Write-Host "`n[NOTICE] Default Epic Games directory not found on C:\" -ForegroundColor Yellow
+            $epicGameDir = Read-Host "Please enter or paste your custom Game download folder path (e.g. J:\Games\EpicGames)"
+            $valid = Test-Path $epicGameDir
+            if (-not $valid) { Write-Host "[ERROR] The path you typed does not exist." -ForegroundColor Red }
+        } while (-not $valid)
+    }
+
+    Write-Host "`nProcessing Game Files directory inside: $epicGameDir... Please wait." -ForegroundColor Cyan
+    Add-FirewallRulesForPath $epicGameDir "Offline_Epic_Block"
+
+    Write-Host "[SUCCESS] Epic Games Launcher and game directories successfully isolated!" -ForegroundColor Green
+    Read-Host "Press Enter to return to main menu..."
+}
+
+function Block-Rockstar {
+    Clear-Host
+    Write-Host "Scanning drives for Rockstar Launcher..." -ForegroundColor Yellow
+    $rockstarMain = $null
+    $rockstarSC64 = $null
+    $rockstarSC32 = $null
+
+    foreach ($d in $DRIVES) {
+        if (-not $rockstarMain -and (Test-Path "$d`:\Program Files\Rockstar Games\Launcher")) {
+            $rockstarMain = "$d`:\Program Files\Rockstar Games\Launcher"
+        }
+        if (-not $rockstarSC64 -and (Test-Path "$d`:\Program Files\Rockstar Games\Social Club")) {
+            $rockstarSC64 = "$d`:\Program Files\Rockstar Games\Social Club"
+        }
+        if (-not $rockstarSC32 -and (Test-Path "$d`:\Program Files (x86)\Rockstar Games\Social Club")) {
+            $rockstarSC32 = "$d`:\Program Files (x86)\Rockstar Games\Social Club"
+        }
+    }
+
+    if (-not $rockstarMain) {
+        Write-Host "[WARNING] Rockstar Launcher could not be found automatically." -ForegroundColor Red
+        $rockstarMain = Read-Host "Enter your main Rockstar Games\Launcher folder path"
+    }
+
+    Write-Host "`nProcessing Rockstar folders... Please wait." -ForegroundColor Cyan
+    Add-FirewallRulesForPath $rockstarMain "Offline_Rockstar_Block"
+    Add-FirewallRulesForPath $rockstarSC64 "Offline_Rockstar_Block"
+    Add-FirewallRulesForPath $rockstarSC32 "Offline_Rockstar_Block"
+    Add-FirewallRulesForPath "$env:LOCALAPPDATA\Rockstar Games" "Offline_Rockstar_Block"
+
+    Write-Host "[SUCCESS] Rockstar folders successfully isolated!" -ForegroundColor Green
+    Read-Host "Press Enter to return to main menu..."
+}
+
+function Block-Custom {
+    Clear-Host
+    Write-Host "===================================================" -ForegroundColor Cyan
+    Write-Host "          CUSTOM GAME DIRECTORY BLOCKER (FAB MODE)" -ForegroundColor Yellow
+    Write-Host "===================================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    do {
+        $customDir = Read-Host "Enter or paste the exact Game folder path (e.g., J:\Games\GTA V)"
+        $valid = Test-Path $customDir
+        if (-not $valid) {
+            Write-Host "`n[ERROR] The folder path you typed does not exist. Please try again.`n" -ForegroundColor Red
+        }
+    } while (-not $valid)
+
+    Write-Host "`nProcessing Custom Directory... Please wait." -ForegroundColor Cyan
+    Add-FirewallRulesForPath $customDir "Offline_Custom_Block"
+
+    Write-Host "`n[SUCCESS] All executables inside `"$customDir`" successfully blocked!" -ForegroundColor Green
+    Read-Host "Press Enter to return to main menu..."
+}
+
+# ===================================================
+# UNBLOCKING LOGIC
+# ===================================================
+
 function Show-ClearMenu {
-    $clearForm = New-Object Windows.Forms.Form
-    $clearForm.Text = "Unblock / Clear Firewall Rules"
-    $clearForm.Size = New-Object Drawing.Size(650, 560)
-    $clearForm.StartPosition = "CenterParent"
+    Clear-Host
+    Write-Host "===================================================" -ForegroundColor Cyan
+    Write-Host "               UNBLOCK / CLEAR MENU" -ForegroundColor Yellow
+    Write-Host "===================================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  [1] Unblock Steam          [4] Unblock Rockstar"
+    Write-Host "  [2] Unblock Ubisoft        [5] Unblock Custom Folder Rules"
+    Write-Host "  [3] Unblock Epic Games     [6] UNBLOCK ALL CLIENTS"
+    Write-Host "  [7] Back to Main Menu"
+    Write-Host ""
+    Write-Host "===================================================" -ForegroundColor Cyan
+    $clearChoice = Read-Host "Select an option (1-7)"
 
-    $lbl = New-Object Windows.Forms.Label
-    $lbl.Text = "Select a firewall rule category and click Delete"
-    $lbl.Location = New-Object Drawing.Point(20, 15)
-    $lbl.AutoSize = $true
-    $clearForm.Controls.Add($lbl)
-
-    $clearList = New-Object Windows.Forms.ListBox
-    $clearList.Location = New-Object Drawing.Point(20, 40)
-    $clearList.Size = New-Object Drawing.Size(590, 380)
-    $clearList.Font = New-Object Drawing.Font("Segoe UI", 10)
-
-    @(
-    "[1] Unblock Steam",
-    "[2] Unblock Ubisoft",
-    "[3] Unblock Epic Games",
-    "[4] Unblock Rockstar",
-    "[5] Unblock Custom Folder Rules",
-    "[6] UNBLOCK ALL CLIENTS"
-    ) | ForEach-Object { [void]$clearList.Items.Add($_) }
-
-    $clearForm.Controls.Add($clearList)
-
-    # Renamed Run to DELETE
-    $btnDelete = New-Object Windows.Forms.Button
-    $btnDelete.Text = "DELETE"
-    $btnDelete.Size = New-Object Drawing.Size(100, 35)
-    $btnDelete.Location = New-Object Drawing.Point(20, 440)
-
-    $btnReturn = New-Object Windows.Forms.Button
-    $btnReturn.Text = "Return"
-    $btnReturn.Size = New-Object Drawing.Size(100, 35)
-    $btnReturn.Location = New-Object Drawing.Point(130, 440)
-
-    $btnDelete.Add_Click({
-        if ($clearList.SelectedIndex -lt 0) {
-            [System.Windows.Forms.MessageBox]::Show("Please select an option to delete.", "Notice")
-            return
+    switch ($clearChoice) {
+        "1" { netsh advfirewall firewall delete rule name="Offline_Steam_Block" > $null 2>&1; Write-Host "Steam restored!" -ForegroundColor Green; Read-Host "Press Enter..." }
+        "2" { netsh advfirewall firewall delete rule name="Offline_Ubi_Block" > $null 2>&1; Write-Host "Ubisoft restored!" -ForegroundColor Green; Read-Host "Press Enter..." }
+        "3" { netsh advfirewall firewall delete rule name="Offline_Epic_Block" > $null 2>&1; Write-Host "Epic restored!" -ForegroundColor Green; Read-Host "Press Enter..." }
+        "4" { netsh advfirewall firewall delete rule name="Offline_Rockstar_Block" > $null 2>&1; Write-Host "Rockstar restored!" -ForegroundColor Green; Read-Host "Press Enter..." }
+        "5" { netsh advfirewall firewall delete rule name="Offline_Custom_Block" > $null 2>&1; Write-Host "Custom rules cleared!" -ForegroundColor Green; Read-Host "Press Enter..." }
+        "6" {
+            Write-Host "`nRemoving all created firewall blocks..." -ForegroundColor Yellow
+            netsh advfirewall firewall delete rule name="Offline_Steam_Block" > $null 2>&1
+            netsh advfirewall firewall delete rule name="Offline_Ubi_Block" > $null 2>&1
+            netsh advfirewall firewall delete rule name="Offline_Epic_Block" > $null 2>&1
+            netsh advfirewall firewall delete rule name="Offline_Rockstar_Block" > $null 2>&1
+            netsh advfirewall firewall delete rule name="Offline_Custom_Block" > $null 2>&1
+            netsh advfirewall firewall delete rule name="Offline_Biz_Block" > $null 2>&1
+            Write-Host "[SUCCESS] All clients and custom rules unblocked. Internet access completely restored!" -ForegroundColor Green
+            Read-Host "Press Enter..."
         }
-
-        switch ($clearList.SelectedIndex) {
-            0 { netsh advfirewall firewall delete rule name="Offline_Steam_Block" > $null 2>&1; [System.Windows.Forms.MessageBox]::Show("Steam rules deleted!", "Success") }
-            1 { netsh advfirewall firewall delete rule name="Offline_Ubi_Block" > $null 2>&1; [System.Windows.Forms.MessageBox]::Show("Ubisoft rules deleted!", "Success") }
-            2 { netsh advfirewall firewall delete rule name="Offline_Epic_Block" > $null 2>&1; [System.Windows.Forms.MessageBox]::Show("Epic Games rules deleted!", "Success") }
-            3 { netsh advfirewall firewall delete rule name="Offline_Rockstar_Block" > $null 2>&1; [System.Windows.Forms.MessageBox]::Show("Rockstar rules deleted!", "Success") }
-            4 { netsh advfirewall firewall delete rule name="Offline_Custom_Block" > $null 2>&1; [System.Windows.Forms.MessageBox]::Show("Custom folder rules deleted!", "Success") }
-            5 {
-                netsh advfirewall firewall delete rule name="Offline_Steam_Block" > $null 2>&1
-                netsh advfirewall firewall delete rule name="Offline_Ubi_Block" > $null 2>&1
-                netsh advfirewall firewall delete rule name="Offline_Epic_Block" > $null 2>&1
-                netsh advfirewall firewall delete rule name="Offline_Rockstar_Block" > $null 2>&1
-                netsh advfirewall firewall delete rule name="Offline_Custom_Block" > $null 2>&1
-                netsh advfirewall firewall delete rule name="Offline_Biz_Block" > $null 2>&1
-                [System.Windows.Forms.MessageBox]::Show("All client and custom firewall blocks deleted successfully!", "Success")
-            }
-        }
-    })
-
-    $btnReturn.Add_Click({ $clearForm.Close() })
-
-    $clearForm.Controls.Add($btnDelete)
-    $clearForm.Controls.Add($btnReturn)
-    [void]$clearForm.ShowDialog()
+        "7" { return }
+    }
 }
 
-# ==============================================================================
-# 4. MAIN GUI MENU
-# ==============================================================================
-$form = New-Object Windows.Forms.Form
-$form.Text = "Ultimate Firewall Activation Manager"
-$form.Size = New-Object Drawing.Size(650, 560)
-$form.StartPosition = "CenterScreen"
+# ===================================================
+# MAIN EXECUTION LOOP
+# ===================================================
+do {
+    Show-MainMenu
+    $choice = Read-Host "Select an option (1-7)"
 
-$label = New-Object Windows.Forms.Label
-$label.Text = "Select an option and click BLOCK"
-$label.Location = New-Object Drawing.Point(20, 15)
-$label.AutoSize = $true
-$form.Controls.Add($label)
-
-$list = New-Object Windows.Forms.ListBox
-$list.Location = New-Object Drawing.Point(20, 40)
-$list.Size = New-Object Drawing.Size(590, 380)
-$list.Font = New-Object Drawing.Font("Segoe UI", 10)
-
-@(
-"[1] Block Steam",
-"[2] Block Ubisoft",
-"[3] Block Epic Games",
-"[4] Block Rockstar Launcher",
-"[5] Block Custom Game Directory (Manual Folder Prompt)",
-"[6] Clear Firewall Rules (Unblock Options)"
-) | ForEach-Object { [void]$list.Items.Add($_) }
-
-$form.Controls.Add($list)
-
-# Renamed Run to BLOCK
-$btnBlock = New-Object Windows.Forms.Button
-$btnBlock.Text = "BLOCK"
-$btnBlock.Size = New-Object Drawing.Size(100, 35)
-$btnBlock.Location = New-Object Drawing.Point(20, 440)
-
-# Renamed Exit to Return
-$btnReturn = New-Object Windows.Forms.Button
-$btnReturn.Text = "Return"
-$btnReturn.Size = New-Object Drawing.Size(100, 35)
-$btnReturn.Location = New-Object Drawing.Point(130, 440)
-
-$btnBlock.Add_Click({
-    if ($list.SelectedIndex -lt 0) {
-        [System.Windows.Forms.MessageBox]::Show("Please select an option.", "Notice")
-        return
+    switch ($choice) {
+        "1" { Block-Steam }
+        "2" { Block-Ubi }
+        "3" { Block-Epic }
+        "4" { Block-Rockstar }
+        "5" { Block-Custom }
+        "6" { Show-ClearMenu }
+        "7" { return }
     }
-
-    switch ($list.SelectedIndex) {
-        0 { # Option 1: Steam
-            $steamPath = $null; $steamCommon = $null; $steamBin = $null
-            foreach ($d in $DRIVES) {
-                if (-not $steamPath -and (Test-Path "$d`:\Program Files (x86)\Steam")) {
-                    $steamPath = "$d`:\Program Files (x86)\Steam"
-                    $steamBin = "$d`:\Program Files (x86)\Steam\bin"
-                }
-                if (-not $steamCommon -and (Test-Path "$d`:\Program Files (x86)\Common Files\Steam")) {
-                    $steamCommon = "$d`:\Program Files (x86)\Common Files\Steam"
-                }
-            }
-            if (-not $steamPath) {
-                $steamPath = Prompt-TextInput "Steam Path" "Enter Steam directory path (e.g. J:\Steam):"
-                if ($steamPath) { $steamBin = Join-Path $steamPath "bin" } else { return }
-            }
-            if (-not $steamCommon) { $steamCommon = "C:\Program Files (x86)\Common Files\Steam" }
-
-            Add-FirewallRulesForPath $steamPath "Offline_Steam_Block"
-            Add-FirewallRulesForPath $steamBin "Offline_Steam_Block"
-            Add-FirewallRulesForPath $steamCommon "Offline_Steam_Block"
-            [System.Windows.Forms.MessageBox]::Show("Steam inbound and outbound rules successfully applied!", "Success")
-        }
-
-        1 { # Option 2: Ubisoft
-            $ubiPath = $null
-            foreach ($d in $DRIVES) {
-                if (-not $ubiPath -and (Test-Path "$d`:\Program Files (x86)\Ubisoft")) {
-                    $ubiPath = "$d`:\Program Files (x86)\Ubisoft"
-                }
-            }
-            if (-not $ubiPath) {
-                $ubiPath = Prompt-TextInput "Ubisoft Path" "Enter Ubisoft folder path:"
-                if (-not $ubiPath) { return }
-            }
-
-            Add-FirewallRulesForPath $ubiPath "Offline_Ubi_Block"
-            [System.Windows.Forms.MessageBox]::Show("Ubisoft inbound and outbound rules successfully applied!", "Success")
-        }
-
-        2 { # Option 3: Epic Games
-            $epicPath = $null
-            foreach ($d in $DRIVES) {
-                if (-not $epicPath -and (Test-Path "$d`:\Program Files (x86)\Epic Games")) {
-                    $epicPath = "$d`:\Program Files (x86)\Epic Games"
-                }
-            }
-            if (-not $epicPath) {
-                $epicPath = Prompt-TextInput "Epic Games Path" "Enter Epic Games Launcher folder path:"
-                if (-not $epicPath) { return }
-            }
-
-            Add-FirewallRulesForPath $epicPath "Offline_Epic_Block"
-
-            $localEpic = "$env:LOCALAPPDATA\EpicGamesLauncher"
-            if (Test-Path $localEpic) { Add-FirewallRulesForPath $localEpic "Offline_Epic_Block" }
-
-            $epicGameDir = "C:\Program Files\Epic Games"
-            if (-not (Test-Path $epicGameDir)) {
-                $epicGameDir = Prompt-TextInput "Custom Game Path" "Enter custom Game download folder path (e.g. J:\Games\EpicGames):"
-            }
-
-            if ($epicGameDir -and (Test-Path $epicGameDir)) {
-                Add-FirewallRulesForPath $epicGameDir "Offline_Epic_Block"
-                [System.Windows.Forms.MessageBox]::Show("Epic Games Launcher and game directories isolated!", "Success")
-            }
-        }
-
-        3 { # Option 4: Rockstar
-            $rockstarMain = $null; $rockstarSC64 = $null; $rockstarSC32 = $null
-            foreach ($d in $DRIVES) {
-                if (-not $rockstarMain -and (Test-Path "$d`:\Program Files\Rockstar Games\Launcher")) {
-                    $rockstarMain = "$d`:\Program Files\Rockstar Games\Launcher"
-                }
-                if (-not $rockstarSC64 -and (Test-Path "$d`:\Program Files\Rockstar Games\Social Club")) {
-                    $rockstarSC64 = "$d`:\Program Files\Rockstar Games\Social Club"
-                }
-                if (-not $rockstarSC32 -and (Test-Path "$d`:\Program Files (x86)\Rockstar Games\Social Club")) {
-                    $rockstarSC32 = "$d`:\Program Files (x86)\Rockstar Games\Social Club"
-                }
-            }
-
-            if (-not $rockstarMain) {
-                $rockstarMain = Prompt-TextInput "Rockstar Path" "Enter Rockstar Launcher path:"
-                if (-not $rockstarMain) { return }
-            }
-
-            Add-FirewallRulesForPath $rockstarMain "Offline_Rockstar_Block"
-            Add-FirewallRulesForPath $rockstarSC64 "Offline_Rockstar_Block"
-            Add-FirewallRulesForPath $rockstarSC32 "Offline_Rockstar_Block"
-            Add-FirewallRulesForPath "$env:LOCALAPPDATA\Rockstar Games" "Offline_Rockstar_Block"
-            [System.Windows.Forms.MessageBox]::Show("Rockstar folders successfully isolated!", "Success")
-        }
-
-        4 { # Option 5: Custom Game Directory Prompt
-            $customDir = Prompt-TextInput "Custom Game Directory Blocker" "Enter or paste exact Game folder path (e.g. J:\Games\GTA V):"
-            if ($customDir -and (Test-Path $customDir)) {
-                Add-FirewallRulesForPath $customDir "Offline_Custom_Block"
-                [System.Windows.Forms.MessageBox]::Show("All executables inside `"$customDir`" successfully blocked!", "Success")
-            } elseif ($customDir) {
-                [System.Windows.Forms.MessageBox]::Show("The specified directory does not exist.", "Error", "OK", "Error")
-            }
-        }
-
-        5 { # Option 6: Clear Firewall Rules Menu
-            Show-ClearMenu
-        }
-    }
-})
-
-$btnReturn.Add_Click({ $form.Close() })
-
-$form.Controls.Add($btnBlock)
-$form.Controls.Add($btnReturn)
-
-[void]$form.ShowDialog()
+} while ($true)
