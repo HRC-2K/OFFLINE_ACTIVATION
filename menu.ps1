@@ -37,11 +37,52 @@ function Show-Menu {
     Write-Host "=========================================================================" -ForegroundColor Cyan
 }
 
-function Invoke-SubScript ($url, $fileName) {
-    Write-Host "`n[+] Fetching and executing sub-script..." -ForegroundColor Cyan
+function Process-App ($url, $fileName, $arguments, $processName) {
+    $filePath = Join-Path $InstallDir $fileName
+    Write-Host "`n[PROCESSING]: $fileName" -ForegroundColor Cyan
+
+    # 1. Kill Process if running
+    if ($processName -ne "none") {
+        $running = Get-Process -Name ([System.IO.Path]::GetFileNameWithoutExtension($processName)) -ErrorAction SilentlyContinue
+        if ($running) {
+            Write-Host "[INFO]: Terminating running process $processName..." -ForegroundColor Yellow
+            Stop-Process -Name ([System.IO.Path]::GetFileNameWithoutExtension($processName)) -Force -ErrorAction SilentlyContinue
+            Start-Sleep -Seconds 2
+        }
+    }
+
+    # 2. Download File
     try {
-        $tempPath = Join-Path $env:TEMP $fileName
-        Invoke-WebRequest -Uri $url -UserAgent "Mozilla/5.0" -OutFile $tempPath
+        Invoke-WebRequest -Uri $url -UserAgent "Mozilla/5.0" -OutFile $filePath -ErrorAction Stop
+    } catch {
+        Write-Host "[ERROR]: Download failed for $fileName - $_" -ForegroundColor Red
+        return
+    }
+
+    # 3. Process Execution
+    Write-Host "Download finished. Installing..." -ForegroundColor Green
+    if ($arguments -eq "ZIP") {
+        Expand-Archive -Path $filePath -DestinationPath "$InstallDir\FirewallAppBlocker" -Force
+        Remove-Item -Path $filePath -Force -ErrorAction SilentlyContinue
+    }
+    elseif ($fileName.EndsWith(".msi")) {
+        Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$filePath`" $arguments" -Wait
+        Remove-Item -Path $filePath -Force -ErrorAction SilentlyContinue
+    }
+    else {
+        Start-Process -FilePath $filePath -ArgumentList $arguments -Wait
+        Remove-Item -Path $filePath -Force -ErrorAction SilentlyContinue
+    }
+    Write-Host "[STATUS]: SUCCESS - $fileName completed." -ForegroundColor Green
+}
+
+function Invoke-SubScript ($url, $fileName) {
+    Write-Host "`n[+] Fetching and executing sub-script: $fileName..." -ForegroundColor Cyan
+    try {
+        $tempPath = Join-Path $InstallDir $fileName
+        Invoke-WebRequest -Uri $url -UserAgent "Mozilla/5.0" -OutFile $tempPath -ErrorAction Stop
+        
+        # Execute batch script directly in cmd
         Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$tempPath`"" -Wait -NoNewWindow
     } catch {
         Write-Error "Failed to execute remote script: $_"
@@ -50,23 +91,23 @@ function Invoke-SubScript ($url, $fileName) {
 
 function Install-App ($choice) {
     switch ($choice) {
-        "1"  { Write-Host "`n[+] Installing UltraViewer..." -ForegroundColor Yellow }
-        "2"  { Write-Host "`n[+] Installing Cloudflare WARP..." -ForegroundColor Yellow }
-        "3"  { Write-Host "`n[+] Extracting Firewall App Blocker..." -ForegroundColor Yellow }
-        "4"  { Write-Host "`n[+] Installing Steam..." -ForegroundColor Yellow }
-        "5"  { Write-Host "`n[+] Installing Ubisoft Connect..." -ForegroundColor Yellow }
-        "6"  { Write-Host "`n[+] Installing Epic Games Launcher..." -ForegroundColor Yellow }
-        "7"  { Write-Host "`n[+] Downloading Rockstar Games Launcher..." -ForegroundColor Yellow }
-        "8"  { Write-Host "`n[+] Installing EA App..." -ForegroundColor Yellow }
-        "9"  { Write-Host "`n[+] Installing TcNo Account Switcher..." -ForegroundColor Yellow }
-        "10" { Write-Host "`n[+] Installing Bulk Crap Uninstaller..." -ForegroundColor Yellow }
+        "1"  { Process-App "https://www.ultraviewer.net/en/UltraViewer_setup_6.6_en.exe" "UltraViewer_setup_6.6_en.exe" "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" "UltraViewer.exe" }
+        "2"  { Process-App "https://downloads.cloudflareclient.com/v1/download/windows/ga" "Cloudflare_1.1.1.1_Setup.msi" "/quiet /norestart ONBOARDING=false" "CloudflareWARP.exe" }
+        "3"  { Process-App "https://www.sordum.org/files/downloads.php?firewall-app-blocker" "FirewallAppBlocker.zip" "ZIP" "Fab.exe" }
+        "4"  { Process-App "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe" "SteamSetup.exe" "/S" "steam.exe" }
+        "5"  { Process-App "https://ubi.li/4vxt9" "UbisoftConnectInstaller.exe" "/S" "upc.exe" }
+        "6"  { Process-App "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/installer/download/EpicGamesLauncherInstaller.exe" "EpicGamesLauncherInstaller.exe" "/qn /norestart" "EpicGamesLauncher.exe" }
+        "7"  { Process-App "https://gamedownloads.rockstargames.com/public/installer/Rockstar-Games-Launcher.exe" "Rockstar-Games-Launcher.exe" "/s /v`"/qn`"" "Launcher.exe" }
+        "8"  { Process-App "https://origin-a.akamaihd.net/EA-Desktop-Client-Download/installer-releases/EAappInstaller.exe" "EAappInstaller.exe" "/q" "EADesktop.exe" }
+        "9"  { Process-App "https://github.com/TCNOco/TcNo-Acc-Switcher/releases/download/2025-11-20_03/TcNo.Account.Switcher.-.Installer_2025-11-20_03.exe" "TcNo.Account.Switcher.exe" "/S" "TcNo Account Switcher.exe" }
+        "10" { Process-App "https://github.com/BCUninstaller/Bulk-Crap-Uninstaller/releases/download/v6.2/BCUninstaller_6.2.0_setup.exe" "BCUninstaller_6.2.0_setup.exe" "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" "BCUninstaller.exe" }
         "11" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/ALL_in_1.bat" "ALL_in_1.bat" }
         "12" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/EA_Adapter_Offline_Method.bat" "EA_Adapter.bat" }
         "13" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/Steam_Ubi_Epic_RStar.bat" "Launcher.bat" }
         "14" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/Silent.Install_Upgrade.bat" "Silent_Install.bat" }
         "A"  { 
             Write-Host "`n[+] Installing ALL items sequentially..." -ForegroundColor Yellow
-            1..10 | ForEach-Object { Install-App "$_" }
+            1..14 | ForEach-Object { Install-App "$_" }
         }
         "X"  { exit }
         default { Write-Host "`n[!] Invalid Selection: $choice" -ForegroundColor Red }
