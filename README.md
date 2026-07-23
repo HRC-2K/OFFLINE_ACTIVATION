@@ -79,10 +79,11 @@ Its goals are to:
 
 The objective is convenience, privacy, and giving users greater control over their own Windows gaming environment.
 
-# ⚠️ Disclaimer
 
-This toolkit is intended to help users manage their Windows gaming environment, install software from official sources, and simplify offline game workflows.
+## ⚠️ Disclaimer
 
-Users are solely responsible for ensuring that their use of this project complies with the license agreements, terms of service, and applicable laws related to the software and games they own.
+This project is intended for managing offline gaming workflows, launcher network isolation, and installing software from official sources.
 
-The author does not encourage software piracy, license circumvention, or any unauthorized use of commercial software.
+Users are responsible for ensuring that their use complies with the applicable software licenses, terms of service, and local laws.
+
+This project does not encourage or support software piracy, illegal distribution, cracked software, license bypasses, or other unauthorized modifications.
