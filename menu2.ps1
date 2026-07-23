@@ -35,7 +35,8 @@ function Show-Menu {
     Write-Host "=========================================================================" -ForegroundColor Cyan
     Write-Host "                FULLY SILENT SMART UPGRADE / INSTALLATION MENU          " -ForegroundColor Yellow
     Write-Host "=========================================================================" -ForegroundColor Cyan
-    Write-Host " [1]  UltraViewer"
+    Write-Host " [0]  Chris Titus Tech Windows Utility" -ForegroundColor Cyan
+	Write-Host " [1]  UltraViewer"
     Write-Host " [2]  Cloudflare 1.1.1.1 WARP"
     Write-Host " [3]  Firewall App Blocker (Extracts Only)"
     Write-Host " [4]  Steam"
@@ -107,6 +108,10 @@ function Invoke-SubScript ($url, $fileName) {
 
 function Install-App ($choice) {
     switch ($choice) {
+		"0"  { 
+            Write-Host "`n[+] Launching Chris Titus Tech Windows Utility..." -ForegroundColor Cyan
+            irm https://christitus.com/win | iex
+        }
         "1"  { Process-App "https://www.ultraviewer.net/en/UltraViewer_setup_6.6_en.exe" "UltraViewer_setup_6.6_en.exe" "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" "UltraViewer.exe" }
         "2"  { Process-App "https://downloads.cloudflareclient.com/v1/download/windows/ga" "Cloudflare_1.1.1.1_Setup.msi" "/quiet /norestart ONBOARDING=false" "CloudflareWARP.exe" }
         "3"  { Process-App "https://www.sordum.org/files/downloads.php?firewall-app-blocker" "FirewallAppBlocker.zip" "ZIP" "Fab.exe" }
