@@ -30,18 +30,19 @@ function Show-Menu {
     Write-Host " [13] Run Steam/Ubi/Epic/Rockstar Script" -ForegroundColor Green
     Write-Host " [14] Update Silent Install Master Script" -ForegroundColor Green
     Write-Host "------------------------------------------------------------------------- " -ForegroundColor DarkGray
-    Write-Host " [A]  Upgrade / Install ALL Items" -ForegroundColor Gold
+    Write-Host " [A]  Upgrade / Install ALL Items" -ForegroundColor Yellow
     Write-Host " [X]  Exit" -ForegroundColor Red
     Write-Host "=========================================================================" -ForegroundColor Cyan
     Write-Host " Files will be saved to: $InstallDir" -ForegroundColor Gray
     Write-Host "=========================================================================" -ForegroundColor Cyan
 }
 
-function Invoke-SubScript ($url) {
-    Write-Host "`n[+] Fetching and executing sub-script in memory..." -ForegroundColor Cyan
+function Invoke-SubScript ($url, $fileName) {
+    Write-Host "`n[+] Fetching and executing sub-script..." -ForegroundColor Cyan
     try {
-        $scriptContent = Invoke-RestMethod -Uri $url -UserAgent "Mozilla/5.0"
-        Invoke-Expression $scriptContent
+        $tempPath = Join-Path $env:TEMP $fileName
+        Invoke-WebRequest -Uri $url -UserAgent "Mozilla/5.0" -OutFile $tempPath
+        Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$tempPath`"" -Wait -NoNewWindow
     } catch {
         Write-Error "Failed to execute remote script: $_"
     }
@@ -59,12 +60,12 @@ function Install-App ($choice) {
         "8"  { Write-Host "`n[+] Installing EA App..." -ForegroundColor Yellow }
         "9"  { Write-Host "`n[+] Installing TcNo Account Switcher..." -ForegroundColor Yellow }
         "10" { Write-Host "`n[+] Installing Bulk Crap Uninstaller..." -ForegroundColor Yellow }
-        "11" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/ALL_in_1.bat" }
-        "12" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/EA_Adapter_Offline_Method.bat" }
-        "13" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/Steam_Ubi_Epic_RStar.bat" }
-        "14" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/Silent.Install_Upgrade.bat" }
+        "11" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/ALL_in_1.bat" "ALL_in_1.bat" }
+        "12" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/EA_Adapter_Offline_Method.bat" "EA_Adapter.bat" }
+        "13" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/Steam_Ubi_Epic_RStar.bat" "Launcher.bat" }
+        "14" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/Silent.Install_Upgrade.bat" "Silent_Install.bat" }
         "A"  { 
-            Write-Host "`n[+] Installing ALL items sequentially..." -ForegroundColor Gold
+            Write-Host "`n[+] Installing ALL items sequentially..." -ForegroundColor Yellow
             1..10 | ForEach-Object { Install-App "$_" }
         }
         "X"  { exit }
