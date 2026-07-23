@@ -127,7 +127,7 @@ function Install-App ($choice) {
         "13" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/Steam_Ubi_Epic_RStar.bat" "Launcher.bat" }
         "14" { 
             Write-Host "`n[+] Running Same thing but in powershell Script..." -ForegroundColor Green
-            irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/menu_bat.ps1" | iex 
+            irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/menu_ps.ps1" | iex 
         }
         "A"  { 
             Write-Host "`n[+] Installing ALL items sequentially..." -ForegroundColor Yellow
