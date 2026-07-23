@@ -6,7 +6,7 @@
 
 ## ⚡ Quick Start
 
-Run the interactive manager instantly from any PowerShell window without downloading extra files:
+Run the script using the following PowerShell command:
 
 ### 🔷 Pure PowerShell Version (Recommended)
 ```powershell
@@ -34,14 +34,15 @@ Automatically fetches official setup packages, performs silent background instal
 
 - [9-10] Utilities: TcNo Account Switcher, Bulk Crap Uninstaller
 
-### 🎮 2. Offline Activation Tools
-- EA Adapter Offline Tool: Isolates hardware by temporarily toggling network adapters, boots the EA App into true offline mode, restores internet upon game start, and automatically kills background EA processes on game exit.
+### 🎮 2. Offline Gaming Tools
 
-- Firewall Isolator: Recursively scans drives C: through Z: to block inbound and outbound rules for Steam, Ubisoft, Epic Games, and Rockstar Launcher directories.
+- **Multi-Launcher Firewall Isolator:** Automatically scans drives **C:** through **Z:** for Steam, Ubisoft Connect, Epic Games Launcher, and Rockstar Games Launcher installations, then creates inbound and outbound Windows Firewall rules to block only the selected launcher executables. Your PC, web browser, and all other applications remain connected to the internet—only the blocked launchers lose network access.
 
-- Custom Directory Blocker: Manually target any folder to recursively block all .exe files inside.
+- **EA Adapter Offline Tool:** Temporarily disables network adapters to launch the EA App in genuine Offline Mode, restores your internet connection automatically after the game starts, and terminates remaining EA background processes when the game exits.
 
-- One-Click Unblocker: Cleanly remove custom or client-specific firewall rules and restore default connectivity.
+- **Custom Directory Blocker:** Select any folder to recursively create Windows Firewall rules for every executable (`.exe`) within the directory and its subfolders.
+
+- **One-Click Unblocker:** Removes all firewall rules created by this toolkit, restoring normal network access for previously blocked launchers and applications.
 
 ## 📁 Repository Structure
 
