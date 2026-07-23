@@ -1,6 +1,15 @@
-# Requires Administrator privileges
-if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Warning "Please re-run this script in a PowerShell window opened as Administrator!"
+# Auto-elevate script to Administrator if not already running as Admin
+$identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+$principal = New-Object Security.Principal.WindowsPrincipal($identity)
+if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    $scriptPath = $MyInvocation.MyCommand.Definition
+    if ($scriptPath) {
+        # Relaunch script as Administrator
+        Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
+    } else {
+        # Fallback if running as an inline script/command
+        Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$MyInvocation.MyCommand`"" -Verb RunAs
+    }
     exit
 }
 
