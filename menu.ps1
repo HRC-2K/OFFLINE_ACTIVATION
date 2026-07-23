@@ -1,6 +1,6 @@
-# Auto-elevate to Administrator
+# Requires Administrator privileges
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Start-Process powershell.exe -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"irm 'https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/menu.ps1' | iex`""
+    Write-Warning "Please re-run this script in a PowerShell window opened as Administrator!"
     exit
 }
 
