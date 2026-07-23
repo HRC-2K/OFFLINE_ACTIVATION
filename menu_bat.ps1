@@ -50,7 +50,7 @@ function Show-Menu {
     Write-Host " [11] Run All-in-1 Script" -ForegroundColor Green
     Write-Host " [12] Run EA Adapter Offline Script" -ForegroundColor Green
     Write-Host " [13] Run Steam/Ubi/Epic/Rockstar Script" -ForegroundColor Green
-    Write-Host " [14] Update Silent Install Master Script" -ForegroundColor Green
+    Write-Host " [14] Same Shit in PowerShell Script" -ForegroundColor Green
     Write-Host "------------------------------------------------------------------------- " -ForegroundColor DarkGray
     Write-Host " [A]  Upgrade / Install ALL Items" -ForegroundColor Yellow
     Write-Host " [X]  Exit" -ForegroundColor Red
@@ -125,8 +125,10 @@ function Install-App ($choice) {
         "11" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/ALL_in_1.bat" "ALL_in_1.bat" }
         "12" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/EA_Adapter_Offline_Method.bat" "EA_Adapter.bat" }
         "13" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/Steam_Ubi_Epic_RStar.bat" "Launcher.bat" }
-        "14" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/Silent.Install_Upgrade.bat" "Silent_Install.bat" }
-        "A"  { 
+		 "14" { 
+            Write-Host "`n[+] Running Same thing but in PowerShell Script..." -ForegroundColor Green
+            irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/menu_ps.ps1" | iex 
+        }
             Write-Host "`n[+] Installing ALL items sequentially..." -ForegroundColor Yellow
             1..14 | ForEach-Object { Install-App "$_" }
         }
