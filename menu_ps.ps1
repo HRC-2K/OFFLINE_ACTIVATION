@@ -50,7 +50,7 @@ function Show-Menu {
     Write-Host " [11] Run All-in-1 Script" -ForegroundColor Green
     Write-Host " [12] Run EA Adapter Offline Script" -ForegroundColor Green
     Write-Host " [13] Run Steam/Ubi/Epic/Rockstar Script" -ForegroundColor Green
-    Write-Host " [14] Same shit in Batch Script" -ForegroundColor Green
+    Write-Host " [14] Runs the sub-scripts via Batch Script" -ForegroundColor Green
     Write-Host "------------------------------------------------------------------------- " -ForegroundColor DarkGray
     Write-Host " [A]  Upgrade / Install ALL Items" -ForegroundColor Yellow
     Write-Host " [X]  Exit" -ForegroundColor Red
@@ -124,7 +124,7 @@ function Install-App ($choice) {
             irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/Steam_Ubi_Epic_RStar.ps1" | iex 
         }
         "14" { 
-            Write-Host "`n[+] Running Same thing but in BATCH Script..." -ForegroundColor Green
+            Write-Host "`n[+] Running sub-scripts via Batch..." -ForegroundColor Green
             irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/menu_bat.ps1" | iex 
         }
         "A"  { 

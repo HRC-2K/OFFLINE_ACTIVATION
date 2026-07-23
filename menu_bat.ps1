@@ -50,7 +50,7 @@ function Show-Menu {
     Write-Host " [11] Run All-in-1 Script" -ForegroundColor Green
     Write-Host " [12] Run EA Adapter Offline Script" -ForegroundColor Green
     Write-Host " [13] Run Steam/Ubi/Epic/Rockstar Script" -ForegroundColor Green
-    Write-Host " [14] Same shit in Powershell script" -ForegroundColor Green
+    Write-Host " [14] Runs everything natively in PowerShell" -ForegroundColor Green
     Write-Host "------------------------------------------------------------------------- " -ForegroundColor DarkGray
     Write-Host " [A]  Upgrade / Install ALL Items" -ForegroundColor Yellow
     Write-Host " [X]  Exit" -ForegroundColor Red
@@ -134,7 +134,7 @@ function Install-App ($choice) {
         "12" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/EA_Adapter_Offline_Method.bat" "EA_Adapter.bat" }
         "13" { Invoke-SubScript "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/Steam_Ubi_Epic_RStar.bat" "Launcher.bat" }
         "14" { 
-            Write-Host "`n[+] Running Same thing but in powershell Script..." -ForegroundColor Green
+            Write-Host "`n[+]Running everything natively in PowerShell Script..." -ForegroundColor Green
             irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/menu_ps.ps1" | iex 
         }
         "A"  { 
