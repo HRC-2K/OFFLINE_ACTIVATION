@@ -50,7 +50,7 @@ function Show-Menu {
     Write-Host " [11] Run All-in-1 Script" -ForegroundColor Green
     Write-Host " [12] Run EA Adapter Offline Script" -ForegroundColor Green
     Write-Host " [13] Run Steam/Ubi/Epic/Rockstar Script" -ForegroundColor Green
-    Write-Host " [14] Update Silent Install Master Script" -ForegroundColor Green
+    Write-Host " [14] Same shit in Batch Script" -ForegroundColor Green
     Write-Host "------------------------------------------------------------------------- " -ForegroundColor DarkGray
     Write-Host " [A]  Upgrade / Install ALL Items" -ForegroundColor Yellow
     Write-Host " [X]  Exit" -ForegroundColor Red
@@ -113,19 +113,19 @@ function Install-App ($choice) {
         "10" { Process-App "https://github.com/BCUninstaller/Bulk-Crap-Uninstaller/releases/download/v6.2/BCUninstaller_6.2.0_setup.exe" "BCUninstaller_6.2.0_setup.exe" "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" "BCUninstaller.exe" }
         "11" { 
             Write-Host "`n[+] Running All-in-1 Script..." -ForegroundColor Green
-            irm "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/ALL_in_1.ps1" | iex 
+            irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/ALL_in_1.ps1" | iex 
         }
         "12" { 
             Write-Host "`n[+] Running EA Adapter Offline Script..." -ForegroundColor Green
-            irm "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/EA_Adapter_Offline_Method.ps1" | iex 
+            irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/EA_Adapter_Offline_Method.ps1" | iex 
         }
         "13" { 
             Write-Host "`n[+] Running Steam/Ubi/Epic/Rockstar Script..." -ForegroundColor Green
-            irm "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/Steam_Ubi_Epic_RStar.ps1" | iex 
+            irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/Steam_Ubi_Epic_RStar.ps1" | iex 
         }
         "14" { 
-            Write-Host "`n[+] Running Silent Install Master Script..." -ForegroundColor Green
-            irm "https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/download/OA/Silent.Install_Upgrade.ps1" | iex 
+            Write-Host "`n[+] Running Same thing but in BATCH Script..." -ForegroundColor Green
+            irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/menu_bat.ps1" | iex 
         }
         "A"  { 
             Write-Host "`n[+] Installing ALL items sequentially..." -ForegroundColor Yellow
