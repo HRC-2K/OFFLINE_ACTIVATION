@@ -57,9 +57,9 @@ OFFLINE_ACTIVATION/
 ```
 
 ## 📋 Requirements
-###  OS: Windows 10 / 11
-### Permissions: Administrator Privileges
-### PowerShell: 5.1 or higher
+* OS: Windows 10 / 11
+* Permissions: Administrator Privileges
+* PowerShell: 5.1 or higher
 
 ## 🔒 Philosophy: Digital Ownership & Offline Control
 
