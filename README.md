@@ -52,7 +52,7 @@ OFFLINE_ACTIVATION/
 ├── ALL_in_1.ps1                   # All-In-One Offline Manager (PowerShell)
 ├── EAOMG.ps1                      # EA Hardware Isolation Tool (GUI)
 ├── EA_Adapter_Offline_Method.ps1  # EA Hardware Isolation Tool (PowerShell)
-├── SUERG.ps1                      # Multi-Launcher Firewall Blocker (GUI0
+├── SUERG.ps1                      # Multi-Launcher Firewall Blocker (GUI)
 ├── Steam_Ubi_Epic_RStar.ps1       # Multi-Launcher Firewall Blocker (PowerShell)
 ```
 
