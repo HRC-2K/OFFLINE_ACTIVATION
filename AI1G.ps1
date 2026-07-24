@@ -7,26 +7,39 @@ $principal = New-Object Security.Principal.WindowsPrincipal($identity)
 if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     $scriptPath = $MyInvocation.MyCommand.Path
     if ($scriptPath) {
-        Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$scriptPath`"" -Verb RunAs
+        Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$scriptPath`"" -WindowStyle Hidden -Verb RunAs
     } else {
         $scriptContent = $MyInvocation.MyCommand.ScriptBlock.ToString()
         $bytes = [System.Text.Encoding]::Unicode.GetBytes($scriptContent)
         $encodedCommand = [Convert]::ToBase64String($bytes)
-        Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $encodedCommand" -Verb RunAs
+        Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $encodedCommand" -WindowStyle Hidden -Verb RunAs
     }
     exit
 }
 
-[System.Windows.Forms.Application]::EnableVisualStyles()
+# ==============================================================================
+# 2. DEPENDENCIES & CONFIGURATION
+# ==============================================================================
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
+[System.Windows.Forms.Application]::EnableVisualStyles()
 
-# Global Configuration
 $DRIVES = @("C", "A", "B", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z")
 
 # ==============================================================================
-# 2. HELPER & BACKEND FUNCTIONS
+# 3. HELPER & BACKEND FUNCTIONS
 # ==============================================================================
+function Log-Status ($message, $colorHex) {
+    if ($null -eq $global:txtLog -or $global:txtLog.IsDisposed) { return }
+    $color = [System.Drawing.ColorTranslator]::FromHtml($colorHex)
+    $global:txtLog.SelectionStart = $global:txtLog.TextLength
+    $global:txtLog.SelectionLength = 0
+    $global:txtLog.SelectionColor = $color
+    $global:txtLog.AppendText("[$(Get-Date -Format 'HH:mm:ss')] ${message}`r`n")
+    $global:txtLog.ScrollToCaret()
+    [System.Windows.Forms.Application]::DoEvents()
+}
+
 function Add-FirewallRulesForPath ($folderPath, $ruleName) {
     if (Test-Path $folderPath) {
         $exeFiles = Get-ChildItem -Path $folderPath -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue
@@ -34,39 +47,60 @@ function Add-FirewallRulesForPath ($folderPath, $ruleName) {
             netsh advfirewall firewall add rule name=$ruleName dir=out action=block program="$($exe.FullName)" enable=yes > $null 2>&1
             netsh advfirewall firewall add rule name=$ruleName dir=in action=block program="$($exe.FullName)" enable=yes > $null 2>&1
         }
+        Log-Status "Applied firewall rules to: ${folderPath}" "#10B981"
+    } else {
+        Log-Status "Path not found: ${folderPath}" "#F59E0B"
     }
 }
 
 function Prompt-TextInput ($title, $promptText) {
     $inputForm = New-Object Windows.Forms.Form
     $inputForm.Text = $title
-    $inputForm.Size = New-Object Drawing.Size(450, 180)
+    $inputForm.Size = New-Object Drawing.Size(520, 220)
     $inputForm.StartPosition = "CenterParent"
     $inputForm.FormBorderStyle = "FixedDialog"
     $inputForm.MaximizeBox = $false
+    $inputForm.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#0F0F12")
+    $inputForm.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
 
     $lbl = New-Object Windows.Forms.Label
     $lbl.Text = $promptText
-    $lbl.Location = New-Object Drawing.Point(20, 15)
-    $lbl.Size = New-Object Drawing.Size(400, 20)
+    $lbl.Location = New-Object Drawing.Point(20, 20)
+    $lbl.Size = New-Object Drawing.Size(460, 25)
+    $lbl.Font = New-Object Drawing.Font("Segoe UI Variable Text", 10.5)
+    $lbl.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#F3F4F6")
     $inputForm.Controls.Add($lbl)
 
     $tb = New-Object Windows.Forms.TextBox
-    $tb.Location = New-Object Drawing.Point(20, 45)
-    $tb.Size = New-Object Drawing.Size(390, 25)
+    $tb.Location = New-Object Drawing.Point(20, 55)
+    $tb.Size = New-Object Drawing.Size(460, 30)
+    $tb.Font = New-Object Drawing.Font("Segoe UI", 11)
+    $tb.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#18181C")
+    $tb.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#E4E4E7")
+    $tb.BorderStyle = "FixedSingle"
     $inputForm.Controls.Add($tb)
 
     $btnOk = New-Object Windows.Forms.Button
     $btnOk.Text = "OK"
-    $btnOk.Location = New-Object Drawing.Point(220, 85)
-    $btnOk.Size = New-Object Drawing.Size(90, 30)
+    $btnOk.Location = New-Object Drawing.Point(250, 110)
+    $btnOk.Size = New-Object Drawing.Size(110, 40)
+    $btnOk.FlatStyle = "Flat"
+    $btnOk.FlatAppearance.BorderSize = 0
+    $btnOk.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#2563EB")
+    $btnOk.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
+    $btnOk.Font = New-Object Drawing.Font("Segoe UI Variable Text", 10.5, [System.Drawing.FontStyle]::Bold)
     $btnOk.DialogResult = [System.Windows.Forms.DialogResult]::OK
     $inputForm.Controls.Add($btnOk)
 
     $btnCancel = New-Object Windows.Forms.Button
     $btnCancel.Text = "Cancel"
-    $btnCancel.Location = New-Object Drawing.Point(320, 85)
-    $btnCancel.Size = New-Object Drawing.Size(90, 30)
+    $btnCancel.Location = New-Object Drawing.Point(370, 110)
+    $btnCancel.Size = New-Object Drawing.Size(110, 40)
+    $btnCancel.FlatStyle = "Flat"
+    $btnCancel.FlatAppearance.BorderSize = 0
+    $btnCancel.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#27272A")
+    $btnCancel.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
+    $btnCancel.Font = New-Object Drawing.Font("Segoe UI Variable Text", 10.5, [System.Drawing.FontStyle]::Bold)
     $btnCancel.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
     $inputForm.Controls.Add($btnCancel)
 
@@ -79,53 +113,124 @@ function Prompt-TextInput ($title, $promptText) {
     return $null
 }
 
-# ==============================================================================
-# 3. SUB-WINDOWS (EA MENU & CLEAR RULES MENU)
-# ==============================================================================
+# Native Page Renderer
+function Open-SubPage ($pageTitle, $pageSubtitle, $itemsArray, $actionButtonText, $actionCallback) {
+    $subForm = New-Object Windows.Forms.Form
+    $subForm.Text = "Ultimate Firewall & EA Offline Manager"
+    $subForm.Size = New-Object Drawing.Size(820, 800)
+    $subForm.StartPosition = "CenterScreen"
+    $subForm.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#0F0F12")
+    $subForm.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
+    $subForm.Font = New-Object Drawing.Font("Segoe UI", 11)
+    $subForm.FormBorderStyle = "FixedDialog"
+    $subForm.MaximizeBox = $false
 
-# Option 5 Sub-Menu (EA Adapter Offline Manager)
-function Show-EaMenu {
-    $eaForm = New-Object Windows.Forms.Form
-    $eaForm.Text = "EA App Automated Offline Tool"
-    $eaForm.Size = New-Object Drawing.Size(650, 560)
-    $eaForm.StartPosition = "CenterParent"
+    # Header Title
+    $lblTitle = New-Object Windows.Forms.Label
+    $lblTitle.Text = $pageTitle
+    $lblTitle.Font = New-Object Drawing.Font("Segoe UI Variable Display", 24, [System.Drawing.FontStyle]::Bold)
+    $lblTitle.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#F9FAFB")
+    $lblTitle.Location = New-Object Drawing.Point(24, 18)
+    $lblTitle.AutoSize = $true
+    $subForm.Controls.Add($lblTitle)
 
-    $lbl = New-Object Windows.Forms.Label
-    $lbl.Text = "Select an EA option and click Run"
-    $lbl.Location = New-Object Drawing.Point(20, 15)
-    $lbl.AutoSize = $true
-    $eaForm.Controls.Add($lbl)
+    # Subtitle
+    $lblSub = New-Object Windows.Forms.Label
+    $lblSub.Text = $pageSubtitle
+    $lblSub.Font = New-Object Drawing.Font("Segoe UI Variable Text", 11, [System.Drawing.FontStyle]::Regular)
+    $lblSub.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#9CA3AF")
+    $lblSub.Location = New-Object Drawing.Point(27, 65)
+    $lblSub.AutoSize = $true
+    $subForm.Controls.Add($lblSub)
 
-    $eaList = New-Object Windows.Forms.ListBox
-    $eaList.Location = New-Object Drawing.Point(20, 40)
-    $eaList.Size = New-Object Drawing.Size(590, 380)
-    $eaList.Font = New-Object Drawing.Font("Segoe UI", 10)
+    # Main ListBox
+    $subList = New-Object Windows.Forms.ListBox
+    $subList.Location = New-Object Drawing.Point(25, 105)
+    $subList.Size = New-Object Drawing.Size(750, 300)
+    $subList.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#18181C")
+    $subList.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#F3F4F6")
+    $subList.BorderStyle = "FixedSingle"
+    $subList.Font = New-Object Drawing.Font("Segoe UI Emoji", 12.5, [System.Drawing.FontStyle]::Regular)
+    $subList.IntegralHeight = $false
 
-    [void]$eaList.Items.Add("[1] Launch EA + Game in Strict Offline Loop")
-    [void]$eaList.Items.Add("[2] Clear / Reset (Force Kill Running Instances)")
-    $eaForm.Controls.Add($eaList)
+    foreach ($item in $itemsArray) {
+        [void]$subList.Items.Add($item)
+    }
+    $subForm.Controls.Add($subList)
 
+    # Console Output Box
+    $subLog = New-Object Windows.Forms.RichTextBox
+    $subLog.Location = New-Object Drawing.Point(25, 425)
+    $subLog.Size = New-Object Drawing.Size(750, 200)
+    $subLog.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#141417")
+    $subLog.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#D1D5DB")
+    $subLog.BorderStyle = "FixedSingle"
+    $subLog.Font = New-Object Drawing.Font("Cascadia Code", 11, [System.Drawing.FontStyle]::Regular)
+    $subLog.ReadOnly = $true
+    $subLog.ScrollBars = "Vertical"
+    $subForm.Controls.Add($subLog)
+
+    $global:txtLog = $subLog
+    Log-Status "Tool initialized. Select an option and click '${actionButtonText}'." "#9CA3AF"
+
+    # Action Button
     $btnRun = New-Object Windows.Forms.Button
-    $btnRun.Text = "Run"
-    $btnRun.Size = New-Object Drawing.Size(100, 35)
-    $btnRun.Location = New-Object Drawing.Point(20, 440)
+    $btnRun.Text = $actionButtonText
+    $btnRun.Location = New-Object Drawing.Point(485, 645)
+    $btnRun.Size = New-Object Drawing.Size(155, 50)
+    $btnRun.FlatStyle = "Flat"
+    $btnRun.FlatAppearance.BorderSize = 0
+    $btnRun.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#2563EB")
+    $btnRun.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
+    $btnRun.Font = New-Object Drawing.Font("Segoe UI Variable Text", 11.5, [System.Drawing.FontStyle]::Bold)
+    $btnRun.Cursor = [System.Windows.Forms.Cursors]::Hand
+    $subForm.Controls.Add($btnRun)
 
+    # Return Button
     $btnReturn = New-Object Windows.Forms.Button
     $btnReturn.Text = "Return"
-    $btnReturn.Size = New-Object Drawing.Size(100, 35)
-    $btnReturn.Location = New-Object Drawing.Point(130, 440)
+    $btnReturn.Location = New-Object Drawing.Point(655, 645)
+    $btnReturn.Size = New-Object Drawing.Size(120, 50)
+    $btnReturn.FlatStyle = "Flat"
+    $btnReturn.FlatAppearance.BorderSize = 0
+    $btnReturn.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#27272A")
+    $btnReturn.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
+    $btnReturn.Font = New-Object Drawing.Font("Segoe UI Variable Text", 11.5, [System.Drawing.FontStyle]::Bold)
+    $btnReturn.Cursor = [System.Windows.Forms.Cursors]::Hand
+    $subForm.Controls.Add($btnReturn)
 
     $btnRun.Add_Click({
-        if ($eaList.SelectedIndex -lt 0) {
-            [System.Windows.Forms.MessageBox]::Show("Please select an option.", "Notice")
+        & $actionCallback $subList.SelectedIndex
+    })
+
+    $btnReturn.Add_Click({ $subForm.Close() })
+
+    $form.Hide()
+    [void]$subForm.ShowDialog()
+    $global:txtLog = $mainLog
+    $form.Show()
+}
+
+# EA Sub-Page Handler
+function Show-EaMenu {
+    $items = @(
+        "🔌   Launch EA + Game in Strict Offline Loop",
+        "🔄   Clear / Reset (Force Kill Running Instances & Restore Network)"
+    )
+
+    Open-SubPage "EA Offline Adapter Tool" "Select an EA execution mode below and click 'Run Selected'." $items "Run Selected" {
+        param($selectedIndex)
+        if ($selectedIndex -lt 0) {
+            Log-Status "Please select an EA option first." "#EF4444"
             return
         }
 
-        if ($eaList.SelectedIndex -eq 0) {
-            $gameExe = Prompt-TextInput "Target Game" "Enter exact game executable name (e.g. bf3.exe):"
+        if ($selectedIndex -eq 0) {
+            $gameExe = Prompt-TextInput "Target Game Executable" "Enter exact game executable name (e.g. bf3.exe):"
             if (-not $gameExe) { return }
 
             $exeNameNoExt = [System.IO.Path]::GetFileNameWithoutExtension($gameExe)
+            Log-Status "Preparing offline loop for ${exeNameNoExt}..." "#3B82F6"
             Stop-Process -Name "EADesktop", "EABackgroundService", "Link2EA", $exeNameNoExt -Force -ErrorAction SilentlyContinue
 
             $eaLauncherExe = $null
@@ -135,21 +240,23 @@ function Show-EaMenu {
             }
 
             if (-not $eaLauncherExe) {
-                [System.Windows.Forms.MessageBox]::Show("EA Launcher path not found automatically.", "Error", "OK", "Error")
+                Log-Status "ERROR: EA Launcher path not found automatically." "#EF4444"
                 return
             }
 
+            Log-Status "Disabling network adapters..." "#F59E0B"
             Disable-NetAdapter -Name "Wi-Fi", "Ethernet" -Confirm:$false -ErrorAction SilentlyContinue
             Start-Sleep -Seconds 2
             Set-Service -Name "EABackgroundService" -StartupType Manual -ErrorAction SilentlyContinue
             Start-Service -Name "EABackgroundService" -ErrorAction SilentlyContinue
             Start-Process -FilePath $eaLauncherExe
 
-            [System.Windows.Forms.MessageBox]::Show("EA App opened offline.`nLaunch your game now!`n`nCLICK OK ONLY AFTER YOU HAVE COMPLETELY EXITED THE GAME.", "Action Required")
+            [System.Windows.Forms.MessageBox]::Show("EA App opened offline.`nLaunch your game now!`n`nCLICK OK ONLY AFTER YOU HAVE COMPLETELY EXITED THE GAME.", "Action Required", "OK", "Information")
 
+            Log-Status "Restoring network adapters..." "#10B981"
             Enable-NetAdapter -Name "Wi-Fi", "Ethernet" -Confirm:$false -ErrorAction SilentlyContinue
 
-            # Background Monitor
+            Log-Status "Monitoring game exit state..." "#3B82F6"
             while ($true) {
                 Start-Sleep -Seconds 2
                 $running = Get-Process -Name $exeNameNoExt -ErrorAction SilentlyContinue
@@ -157,74 +264,41 @@ function Show-EaMenu {
             }
 
             Stop-Process -Name "EADesktop", "EABackgroundService", "Link2EA" -Force -ErrorAction SilentlyContinue
-            [System.Windows.Forms.MessageBox]::Show("Game exit detected! EA session wiped clean.", "Success")
+            Log-Status "Game exit detected! EA session wiped clean." "#10B981"
         }
-        elseif ($eaList.SelectedIndex -eq 1) {
+        elseif ($selectedIndex -eq 1) {
+            Log-Status "Executing emergency reset..." "#F59E0B"
             Enable-NetAdapter -Name "Wi-Fi", "Ethernet" -Confirm:$false -ErrorAction SilentlyContinue
             Stop-Process -Name "EADesktop", "EABackgroundService", "Link2EA" -Force -ErrorAction SilentlyContinue
-            [System.Windows.Forms.MessageBox]::Show("Emergency reset complete! Network restored.", "Cleanup Complete")
+            Log-Status "Emergency reset complete! Network restored." "#10B981"
         }
-    })
-
-    $btnReturn.Add_Click({ $eaForm.Close() })
-
-    $eaForm.Controls.Add($btnRun)
-    $eaForm.Controls.Add($btnReturn)
-    [void]$eaForm.ShowDialog()
+    }
 }
 
-# Option 7 Sub-Menu (Clear Firewall Rules)
+# Clear Rules Sub-Page Handler
 function Show-ClearMenu {
-    $clearForm = New-Object Windows.Forms.Form
-    $clearForm.Text = "Unblock / Clear Firewall Rules"
-    $clearForm.Size = New-Object Drawing.Size(650, 560)
-    $clearForm.StartPosition = "CenterParent"
+    $items = @(
+        "🎮   Unblock Steam Rules",
+        "🎮   Unblock Ubisoft Rules",
+        "🎮   Unblock Epic Games Rules",
+        "🎮   Unblock Rockstar Rules",
+        "📁   Unblock Custom Folder Rules",
+        "🧹   UNBLOCK ALL CLIENTS & CUSTOM RULES"
+    )
 
-    $lbl = New-Object Windows.Forms.Label
-    $lbl.Text = "Select a firewall rule category and click Delete"
-    $lbl.Location = New-Object Drawing.Point(20, 15)
-    $lbl.AutoSize = $true
-    $clearForm.Controls.Add($lbl)
-
-    $clearList = New-Object Windows.Forms.ListBox
-    $clearList.Location = New-Object Drawing.Point(20, 40)
-    $clearList.Size = New-Object Drawing.Size(590, 380)
-    $clearList.Font = New-Object Drawing.Font("Segoe UI", 10)
-
-    @(
-    "[1] Unblock Steam",
-    "[2] Unblock Ubisoft",
-    "[3] Unblock Epic Games",
-    "[4] Unblock Rockstar",
-    "[5] Unblock Custom Folder Rules",
-    "[6] UNBLOCK ALL CLIENTS"
-    ) | ForEach-Object { [void]$clearList.Items.Add($_) }
-
-    $clearForm.Controls.Add($clearList)
-
-    # Renamed to DELETE per instructions
-    $btnDelete = New-Object Windows.Forms.Button
-    $btnDelete.Text = "DELETE"
-    $btnDelete.Size = New-Object Drawing.Size(100, 35)
-    $btnDelete.Location = New-Object Drawing.Point(20, 440)
-
-    $btnReturn = New-Object Windows.Forms.Button
-    $btnReturn.Text = "Return"
-    $btnReturn.Size = New-Object Drawing.Size(100, 35)
-    $btnReturn.Location = New-Object Drawing.Point(130, 440)
-
-    $btnDelete.Add_Click({
-        if ($clearList.SelectedIndex -lt 0) {
-            [System.Windows.Forms.MessageBox]::Show("Please select an option to delete.", "Notice")
+    Open-SubPage "Unblock Firewall Rules" "Select a firewall rule category below to remove and click 'Run Selected'." $items "Run Selected" {
+        param($selectedIndex)
+        if ($selectedIndex -lt 0) {
+            Log-Status "Please select a rule option to delete." "#EF4444"
             return
         }
 
-        switch ($clearList.SelectedIndex) {
-            0 { netsh advfirewall firewall delete rule name="Offline_Steam_Block" > $null 2>&1; [System.Windows.Forms.MessageBox]::Show("Steam rules deleted!") }
-            1 { netsh advfirewall firewall delete rule name="Offline_Ubi_Block" > $null 2>&1; [System.Windows.Forms.MessageBox]::Show("Ubisoft rules deleted!") }
-            2 { netsh advfirewall firewall delete rule name="Offline_Epic_Block" > $null 2>&1; [System.Windows.Forms.MessageBox]::Show("Epic Games rules deleted!") }
-            3 { netsh advfirewall firewall delete rule name="Offline_Rockstar_Block" > $null 2>&1; [System.Windows.Forms.MessageBox]::Show("Rockstar rules deleted!") }
-            4 { netsh advfirewall firewall delete rule name="Offline_Custom_Block" > $null 2>&1; [System.Windows.Forms.MessageBox]::Show("Custom folder rules deleted!") }
+        switch ($selectedIndex) {
+            0 { netsh advfirewall firewall delete rule name="Offline_Steam_Block" > $null 2>&1; Log-Status "Deleted Steam Firewall Rules." "#10B981" }
+            1 { netsh advfirewall firewall delete rule name="Offline_Ubi_Block" > $null 2>&1; Log-Status "Deleted Ubisoft Firewall Rules." "#10B981" }
+            2 { netsh advfirewall firewall delete rule name="Offline_Epic_Block" > $null 2>&1; Log-Status "Deleted Epic Games Firewall Rules." "#10B981" }
+            3 { netsh advfirewall firewall delete rule name="Offline_Rockstar_Block" > $null 2>&1; Log-Status "Deleted Rockstar Firewall Rules." "#10B981" }
+            4 { netsh advfirewall firewall delete rule name="Offline_Custom_Block" > $null 2>&1; Log-Status "Deleted Custom Folder Firewall Rules." "#10B981" }
             5 {
                 netsh advfirewall firewall delete rule name="Offline_Steam_Block" > $null 2>&1
                 netsh advfirewall firewall delete rule name="Offline_Ubi_Block" > $null 2>&1
@@ -232,16 +306,10 @@ function Show-ClearMenu {
                 netsh advfirewall firewall delete rule name="Offline_Rockstar_Block" > $null 2>&1
                 netsh advfirewall firewall delete rule name="Offline_Custom_Block" > $null 2>&1
                 netsh advfirewall firewall delete rule name="Offline_Biz_Block" > $null 2>&1
-                [System.Windows.Forms.MessageBox]::Show("All client and custom firewall blocks deleted successfully!")
+                Log-Status "SUCCESS: All client and custom firewall blocks deleted!" "#10B981"
             }
         }
-    })
-
-    $btnReturn.Add_Click({ $clearForm.Close() })
-
-    $clearForm.Controls.Add($btnDelete)
-    $clearForm.Controls.Add($btnReturn)
-    [void]$clearForm.ShowDialog()
+    }
 }
 
 # ==============================================================================
@@ -249,52 +317,110 @@ function Show-ClearMenu {
 # ==============================================================================
 $form = New-Object Windows.Forms.Form
 $form.Text = "Ultimate Firewall & EA Offline Manager"
-$form.Size = New-Object Drawing.Size(650, 560)
+$form.Size = New-Object Drawing.Size(820, 800)
 $form.StartPosition = "CenterScreen"
+$form.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#0F0F12")
+$form.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
+$form.Font = New-Object Drawing.Font("Segoe UI", 11)
+$form.FormBorderStyle = "FixedDialog"
+$form.MaximizeBox = $false
 
-$label = New-Object Windows.Forms.Label
-$label.Text = "Select an option and click BLOCK"
-$label.Location = New-Object Drawing.Point(20, 15)
-$label.AutoSize = $true
-$form.Controls.Add($label)
+# Header Title
+$lblTitle = New-Object Windows.Forms.Label
+$lblTitle.Text = "Firewall Manager"
+$lblTitle.Font = New-Object Drawing.Font("Segoe UI Variable Display", 24, [System.Drawing.FontStyle]::Bold)
+$lblTitle.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#F9FAFB")
+$lblTitle.Location = New-Object Drawing.Point(24, 18)
+$lblTitle.AutoSize = $true
+$form.Controls.Add($lblTitle)
 
+# Subtitle
+$lblSub = New-Object Windows.Forms.Label
+$lblSub.Text = "Select a launcher or directory below to manage offline firewall rules."
+$lblSub.Font = New-Object Drawing.Font("Segoe UI Variable Text", 11, [System.Drawing.FontStyle]::Regular)
+$lblSub.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#9CA3AF")
+$lblSub.Location = New-Object Drawing.Point(27, 65)
+$lblSub.AutoSize = $true
+$form.Controls.Add($lblSub)
+
+# Main ListBox
 $list = New-Object Windows.Forms.ListBox
-$list.Location = New-Object Drawing.Point(20, 40)
-$list.Size = New-Object Drawing.Size(590, 380)
-$list.Font = New-Object Drawing.Font("Segoe UI", 10)
+$list.Location = New-Object Drawing.Point(25, 105)
+$list.Size = New-Object Drawing.Size(750, 300)
+$list.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#18181C")
+$list.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#F3F4F6")
+$list.BorderStyle = "FixedSingle"
+$list.Font = New-Object Drawing.Font("Segoe UI Emoji", 12.5, [System.Drawing.FontStyle]::Regular)
+$list.IntegralHeight = $false
 
 @(
-"[1] Block Steam",
-"[2] Block Ubisoft",
-"[3] Block Epic Games",
-"[4] Block Rockstar Launcher",
-"[5] Block EA (Adapter Offline Method)",
-"[6] Block Custom Game Directory (Manual Folder Prompt)",
-"[7] Clear Firewall Rules (Unblock Options)"
+"🎮   Block Steam",
+"🎮   Block Ubisoft Connect",
+"🎮   Block Epic Games Launcher",
+"🎮   Block Rockstar Games Launcher",
+"🔌   Block EA (Adapter Offline Method)",
+"📁   Block Custom Game Directory (Manual Folder Prompt)",
+"🧹   Clear Firewall Rules (Unblock Options)"
 ) | ForEach-Object { [void]$list.Items.Add($_) }
 
 $form.Controls.Add($list)
 
-# Renamed Run to BLOCK
-$btnBlock = New-Object Windows.Forms.Button
-$btnBlock.Text = "BLOCK"
-$btnBlock.Size = New-Object Drawing.Size(100, 35)
-$btnBlock.Location = New-Object Drawing.Point(20, 440)
+# Console Output Box
+$mainLog = New-Object Windows.Forms.RichTextBox
+$mainLog.Location = New-Object Drawing.Point(25, 425)
+$mainLog.Size = New-Object Drawing.Size(750, 200)
+$mainLog.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#141417")
+$mainLog.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#D1D5DB")
+$mainLog.BorderStyle = "FixedSingle"
+$mainLog.Font = New-Object Drawing.Font("Cascadia Code", 11, [System.Drawing.FontStyle]::Regular)
+$mainLog.ReadOnly = $true
+$mainLog.ScrollBars = "Vertical"
+$form.Controls.Add($mainLog)
 
-# Renamed Exit to Return
+$global:txtLog = $mainLog
+
+# Block Action Button
+$btnBlock = New-Object Windows.Forms.Button
+$btnBlock.Text = "Apply Action"
+$btnBlock.Location = New-Object Drawing.Point(485, 645)
+$btnBlock.Size = New-Object Drawing.Size(155, 50)
+$btnBlock.FlatStyle = "Flat"
+$btnBlock.FlatAppearance.BorderSize = 0
+$btnBlock.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#2563EB")
+$btnBlock.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
+$btnBlock.Font = New-Object Drawing.Font("Segoe UI Variable Text", 11.5, [System.Drawing.FontStyle]::Bold)
+$btnBlock.Cursor = [System.Windows.Forms.Cursors]::Hand
+$form.Controls.Add($btnBlock)
+
+# Exit Button
 $btnReturn = New-Object Windows.Forms.Button
-$btnReturn.Text = "Return"
-$btnReturn.Size = New-Object Drawing.Size(100, 35)
-$btnReturn.Location = New-Object Drawing.Point(130, 440)
+$btnReturn.Text = "Exit"
+$btnReturn.Location = New-Object Drawing.Point(655, 645)
+$btnReturn.Size = New-Object Drawing.Size(120, 50)
+$btnReturn.FlatStyle = "Flat"
+$btnReturn.FlatAppearance.BorderSize = 0
+$btnReturn.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#27272A")
+$btnReturn.ForeColor = [System.Drawing.ColorTranslator]::FromHtml("#FFFFFF")
+$btnReturn.Font = New-Object Drawing.Font("Segoe UI Variable Text", 11.5, [System.Drawing.FontStyle]::Bold)
+$btnReturn.Cursor = [System.Windows.Forms.Cursors]::Hand
+$form.Controls.Add($btnReturn)
+
+# ==============================================================================
+# 5. EXECUTION LOGIC
+# ==============================================================================
+Log-Status "Manager initialized. Select a task and click 'Apply Action'." "#9CA3AF"
 
 $btnBlock.Add_Click({
     if ($list.SelectedIndex -lt 0) {
-        [System.Windows.Forms.MessageBox]::Show("Please select an option.", "Notice")
+        Log-Status "Please select an option from the list first." "#EF4444"
         return
     }
 
+    $btnBlock.Enabled = $false
+
     switch ($list.SelectedIndex) {
         0 { # Steam
+            Log-Status "Scanning drives for Steam installation..." "#3B82F6"
             $steamPath = $null; $steamCommon = $null; $steamBin = $null
             foreach ($d in $DRIVES) {
                 if (-not $steamPath -and (Test-Path "$d`:\Program Files (x86)\Steam")) {
@@ -307,16 +433,17 @@ $btnBlock.Add_Click({
             }
             if (-not $steamPath) {
                 $steamPath = Prompt-TextInput "Steam Path" "Enter Steam directory path (e.g. J:\Steam):"
-                if ($steamPath) { $steamBin = Join-Path $steamPath "bin" } else { return }
+                if ($steamPath) { $steamBin = Join-Path $steamPath "bin" } else { $btnBlock.Enabled = $true; return }
             }
             if (-not $steamCommon) { $steamCommon = "C:\Program Files (x86)\Common Files\Steam" }
 
             Add-FirewallRulesForPath $steamPath "Offline_Steam_Block"
             Add-FirewallRulesForPath $steamBin "Offline_Steam_Block"
             Add-FirewallRulesForPath $steamCommon "Offline_Steam_Block"
-            [System.Windows.Forms.MessageBox]::Show("Steam inbound and outbound rules successfully applied!", "Success")
+            Log-Status "SUCCESS: Steam inbound and outbound rules applied!" "#10B981"
         }
         1 { # Ubisoft
+            Log-Status "Scanning drives for Ubisoft installation..." "#3B82F6"
             $ubiPath = $null
             foreach ($d in $DRIVES) {
                 if (-not $ubiPath -and (Test-Path "$d`:\Program Files (x86)\Ubisoft")) {
@@ -325,13 +452,14 @@ $btnBlock.Add_Click({
             }
             if (-not $ubiPath) {
                 $ubiPath = Prompt-TextInput "Ubisoft Path" "Enter Ubisoft folder path:"
-                if (-not $ubiPath) { return }
+                if (-not $ubiPath) { $btnBlock.Enabled = $true; return }
             }
 
             Add-FirewallRulesForPath $ubiPath "Offline_Ubi_Block"
-            [System.Windows.Forms.MessageBox]::Show("Ubisoft inbound and outbound rules successfully applied!", "Success")
+            Log-Status "SUCCESS: Ubisoft inbound and outbound rules applied!" "#10B981"
         }
         2 { # Epic Games
+            Log-Status "Scanning drives for Epic Games Launcher..." "#3B82F6"
             $epicPath = $null
             foreach ($d in $DRIVES) {
                 if (-not $epicPath -and (Test-Path "$d`:\Program Files (x86)\Epic Games")) {
@@ -340,7 +468,7 @@ $btnBlock.Add_Click({
             }
             if (-not $epicPath) {
                 $epicPath = Prompt-TextInput "Epic Games Path" "Enter Epic Games Launcher folder path:"
-                if (-not $epicPath) { return }
+                if (-not $epicPath) { $btnBlock.Enabled = $true; return }
             }
 
             Add-FirewallRulesForPath $epicPath "Offline_Epic_Block"
@@ -355,10 +483,11 @@ $btnBlock.Add_Click({
 
             if ($epicGameDir -and (Test-Path $epicGameDir)) {
                 Add-FirewallRulesForPath $epicGameDir "Offline_Epic_Block"
-                [System.Windows.Forms.MessageBox]::Show("Epic Games Launcher and game directories isolated!", "Success")
+                Log-Status "SUCCESS: Epic Games Launcher and game directories isolated!" "#10B981"
             }
         }
         3 { # Rockstar
+            Log-Status "Scanning drives for Rockstar Games Launcher..." "#3B82F6"
             $rockstarMain = $null; $rockstarSC64 = $null; $rockstarSC32 = $null
             foreach ($d in $DRIVES) {
                 if (-not $rockstarMain -and (Test-Path "$d`:\Program Files\Rockstar Games\Launcher")) {
@@ -374,36 +503,35 @@ $btnBlock.Add_Click({
 
             if (-not $rockstarMain) {
                 $rockstarMain = Prompt-TextInput "Rockstar Path" "Enter Rockstar Launcher path:"
-                if (-not $rockstarMain) { return }
+                if (-not $rockstarMain) { $btnBlock.Enabled = $true; return }
             }
 
             Add-FirewallRulesForPath $rockstarMain "Offline_Rockstar_Block"
             Add-FirewallRulesForPath $rockstarSC64 "Offline_Rockstar_Block"
             Add-FirewallRulesForPath $rockstarSC32 "Offline_Rockstar_Block"
             Add-FirewallRulesForPath "$env:LOCALAPPDATA\Rockstar Games" "Offline_Rockstar_Block"
-            [System.Windows.Forms.MessageBox]::Show("Rockstar folders successfully isolated!", "Success")
+            Log-Status "SUCCESS: Rockstar folders isolated!" "#10B981"
         }
-        4 { # Option 5: EA Adapter Sub-Menu
+        4 { # EA Adapter Offline Sub-Page
             Show-EaMenu
         }
-        5 { # Option 6: Custom Folder Prompt
+        5 { # Custom Folder Blocker
             $customDir = Prompt-TextInput "Custom Folder Blocker" "Enter or paste exact Game folder path (e.g. J:\Games\GTA V):"
             if ($customDir -and (Test-Path $customDir)) {
                 Add-FirewallRulesForPath $customDir "Offline_Custom_Block"
-                [System.Windows.Forms.MessageBox]::Show("All executables inside `"$customDir`" successfully blocked!", "Success")
+                Log-Status "SUCCESS: All executables inside '${customDir}' blocked!" "#10B981"
             } elseif ($customDir) {
-                [System.Windows.Forms.MessageBox]::Show("The specified directory does not exist.", "Error", "OK", "Error")
+                Log-Status "ERROR: The specified directory '${customDir}' does not exist." "#EF4444"
             }
         }
-        6 { # Option 7: Unblock Menu
+        6 { # Unblock Options Sub-Page
             Show-ClearMenu
         }
     }
+
+    $btnBlock.Enabled = $true
 })
 
 $btnReturn.Add_Click({ $form.Close() })
-
-$form.Controls.Add($btnBlock)
-$form.Controls.Add($btnReturn)
 
 [void]$form.ShowDialog()
