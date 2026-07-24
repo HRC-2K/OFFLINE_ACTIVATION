@@ -319,9 +319,9 @@ $btnBlock.Font = New-Object Drawing.Font("Segoe UI Variable Text", 11.5, [System
 $btnBlock.Cursor = [System.Windows.Forms.Cursors]::Hand
 $form.Controls.Add($btnBlock)
 
-# Exit Button
+# Return Button
 $btnReturn = New-Object Windows.Forms.Button
-$btnReturn.Text = "Exit"
+$btnReturn.Text = "Return"
 $btnReturn.Location = New-Object Drawing.Point(655, 645)
 $btnReturn.Size = New-Object Drawing.Size(120, 50)
 $btnReturn.FlatStyle = "Flat"
@@ -387,7 +387,7 @@ $btnBlock.Add_Click({
         }
         2 { # Epic Games
             Log-Status "Scanning drives for Epic Games Launcher..." "#3B82F6"
-            $epicPath = $null
+            $epicPath = $null;
             foreach ($d in $DRIVES) {
                 if (-not $epicPath -and (Test-Path "$d`:\Program Files (x86)\Epic Games")) {
                     $epicPath = "$d`:\Program Files (x86)\Epic Games"

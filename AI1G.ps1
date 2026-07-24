@@ -392,9 +392,9 @@ $btnBlock.Font = New-Object Drawing.Font("Segoe UI Variable Text", 11.5, [System
 $btnBlock.Cursor = [System.Windows.Forms.Cursors]::Hand
 $form.Controls.Add($btnBlock)
 
-# Exit Button
+# Return Button
 $btnReturn = New-Object Windows.Forms.Button
-$btnReturn.Text = "Exit"
+$btnReturn.Text = "Return"
 $btnReturn.Location = New-Object Drawing.Point(655, 645)
 $btnReturn.Size = New-Object Drawing.Size(120, 50)
 $btnReturn.FlatStyle = "Flat"
