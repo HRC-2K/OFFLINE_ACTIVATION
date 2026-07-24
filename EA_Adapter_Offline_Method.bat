@@ -94,7 +94,7 @@ echo.
 pause
 
 echo.
-echo 6. Game running! Restoring PC internet access (Adapters ON)...
+echo 6. Game Stopped! Restoring PC internet access (Adapters ON)...
 netsh interface set interface "Wi-Fi" enable >nul 2>&1
 netsh interface set interface "Ethernet" enable >nul 2>&1
 

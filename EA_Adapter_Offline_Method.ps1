@@ -89,7 +89,7 @@ function Invoke-EaLaunchOffline {
     Write-Host "3. RETURN TO THIS WINDOW ONLY AFTER YOU HAVE COMPLETELY EXITED THE GAME.`n"
     Read-Host "Press Enter AFTER YOU HAVE COMPLETELY EXITED THE GAME..."
 
-    Write-Host "`n6. Game running! Restoring PC internet access (Adapters ON)..." -ForegroundColor Green
+    Write-Host "`n6. Game Stopped! Restoring PC internet access (Adapters ON)..." -ForegroundColor Green
     Enable-NetAdapter -Name "Wi-Fi", "Ethernet" -Confirm:$false -ErrorAction SilentlyContinue
 
     Write-Host "`n===================================================" -ForegroundColor Cyan
