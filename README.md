@@ -12,10 +12,7 @@ Run the script using the following PowerShell command:
 ```powershell
 irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/menu_ps.ps1" | iex
 ```
-### 🔶 Batch-Compatible Version
-```powershell
-irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/menu_bat.ps1" | iex
-```
+
 📌 Note: Administrator privileges are required to manage network adapters and Windows Firewall rules. The script will automatically request UAC elevation if launched without admin rights.
 
 ## ✨ Features & Capabilities
