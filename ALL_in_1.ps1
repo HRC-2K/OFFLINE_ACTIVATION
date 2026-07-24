@@ -291,8 +291,8 @@ function Invoke-EaLaunchOffline {
     Write-Host "===================================================" -ForegroundColor Cyan
     Write-Host "1. The EA App will open completely offline."
     Write-Host "2. Click and LAUNCH your game now from the library."
-    Write-Host "3. Return to this window ONLY AFTER your game has fully booted up.`n"
-    Read-Host "Press Enter AFTER your game is running..."
+    Write-Host "3. RETURN TO THIS WINDOW ONLY AFTER YOU HAVE COMPLETELY EXITED THE GAME.`n"
+    Read-Host "Press Enter AFTER YOU HAVE COMPLETELY EXITED THE GAME..."
 
     Write-Host "`n6. Game running! Restoring PC internet access (Adapters ON)..." -ForegroundColor Green
     Enable-NetAdapter -Name "Wi-Fi", "Ethernet" -Confirm:$false -ErrorAction SilentlyContinue

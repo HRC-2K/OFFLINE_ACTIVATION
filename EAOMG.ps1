@@ -147,7 +147,7 @@ $btnBlock.Add_Click({
             Start-Process -FilePath $eaLauncherExe
 
             # 5. Prompt User to launch game
-            [System.Windows.Forms.MessageBox]::Show("1. EA App has opened offline.`n2. Launch your game now from the library.`n`n3. Click OK ONLY AFTER your game has fully booted up.", "Action Required")
+            [System.Windows.Forms.MessageBox]::Show("1. EA App has opened offline.`n2. Launch your game now from the library.`n`n3. CLICK OK ONLY AFTER YOU HAVE COMPLETELY EXITED THE GAME.", "Action Required")
 
             # 6. Restore Internet
             Enable-NetAdapter -Name "Wi-Fi", "Ethernet" -Confirm:$false -ErrorAction SilentlyContinue

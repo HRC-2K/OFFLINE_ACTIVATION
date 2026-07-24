@@ -145,7 +145,7 @@ function Show-EaMenu {
             Start-Service -Name "EABackgroundService" -ErrorAction SilentlyContinue
             Start-Process -FilePath $eaLauncherExe
 
-            [System.Windows.Forms.MessageBox]::Show("EA App opened offline.`nLaunch your game now!`n`nCLICK OK ONLY AFTER YOU COMPLETELY EXIT THE GAME.", "Action Required")
+            [System.Windows.Forms.MessageBox]::Show("EA App opened offline.`nLaunch your game now!`n`nCLICK OK ONLY AFTER YOU HAVE COMPLETELY EXITED THE GAME.", "Action Required")
 
             Enable-NetAdapter -Name "Wi-Fi", "Ethernet" -Confirm:$false -ErrorAction SilentlyContinue
 

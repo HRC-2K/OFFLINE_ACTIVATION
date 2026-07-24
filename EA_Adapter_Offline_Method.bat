@@ -89,7 +89,7 @@ echo STEP 5: ACTION REQUIRED
 echo ===================================================
 echo 1. The EA App will open completely offline.
 echo 2. Click and LAUNCH your game now from the library.
-echo 3. Return to this window ONLY AFTER your game has fully booted up.
+echo 3. RETURN TO THIS WINDOW ONLY AFTER YOU HAVE COMPLETELY EXITED THE GAME.
 echo.
 pause
 
