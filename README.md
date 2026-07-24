@@ -48,13 +48,12 @@ Automatically fetches official setup packages, performs silent background instal
 ```text
 OFFLINE_ACTIVATION/
 ├── menu_ps.ps1                    # Master Native PowerShell Menu
-├── menu_bat.ps1                   # Master Batch-Execution Menu
+├── AI1G.ps1                       # All-In-One Offline Manager (GUI)
 ├── ALL_in_1.ps1                   # All-In-One Offline Manager (PowerShell)
-├── ALL_in_1.bat                   # All-In-One Offline Manager (Batch)
+├── EAOMG.ps1                      # EA Hardware Isolation Tool (GUI)
 ├── EA_Adapter_Offline_Method.ps1  # EA Hardware Isolation Tool (PowerShell)
-├── EA_Adapter_Offline_Method.bat  # EA Hardware Isolation Tool (Batch)
+├── SUERG.ps1                      #  Multi-Launcher Firewall Blocker (GUI0
 ├── Steam_Ubi_Epic_RStar.ps1       # Multi-Launcher Firewall Blocker (PowerShell)
-└── Steam_Ubi_Epic_RStar.bat       # Multi-Launcher Firewall Blocker (Batch)
 ```
 
 ## 📋 Requirements
