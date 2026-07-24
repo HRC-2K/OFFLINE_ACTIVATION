@@ -37,7 +37,7 @@ Automatically fetches official setup packages, performs silent background instal
 
 - **Multi-Launcher Firewall Isolator:** Automatically scans drives **C:** through **Z:** for Steam, Ubisoft Connect, Epic Games Launcher, and Rockstar Games Launcher installations, then creates inbound and outbound Windows Firewall rules to block only the selected launcher executables. Your PC, web browser, and all other applications remain connected to the internet—only the blocked launchers lose network access.
 
-- **EA Adapter Offline Tool:** Temporarily disables network adapters to launch the EA App in genuine Offline Mode, restores your internet connection automatically after you click OK, and terminates remaining EA background processes when the game exits.
+- **Temporarily disables network adapters to launch the EA App in genuine Offline Mode. Once the game exits, it terminates remaining EA background processes and automatically restores your internet connection after you click OK.
 
 - **Custom Directory Blocker:** Select any folder to recursively create Windows Firewall rules for every executable (`.exe`) within the directory and its subfolders.
 
