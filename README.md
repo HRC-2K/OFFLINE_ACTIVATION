@@ -13,10 +13,10 @@ Run the script using the following PowerShell command:
 irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/menu_ps.ps1" | iex
 ```
 
-<img width="250" height="152" alt="1" src="https://github.com/user-attachments/assets/053d2243-c345-47d8-a591-6a239efed6ec" />
-<img width="250" height="152" alt="2" src="https://github.com/user-attachments/assets/03d8cfc1-e8e9-4765-a8d4-eea43b8ca776" />
-<img width="250" height="152" alt="3" src="https://github.com/user-attachments/assets/796bede0-d8c5-4c76-a0d6-424ea71d1098" />
-<img width="250" height="152" alt="4" src="https://github.com/user-attachments/assets/a2dc9882-e700-4426-a4d6-493037577459" />
+<img width="350" height="252" alt="1" src="https://github.com/user-attachments/assets/053d2243-c345-47d8-a591-6a239efed6ec" />
+<img width="350" height="252" alt="2" src="https://github.com/user-attachments/assets/03d8cfc1-e8e9-4765-a8d4-eea43b8ca776" />
+<img width="350" height="252" alt="3" src="https://github.com/user-attachments/assets/796bede0-d8c5-4c76-a0d6-424ea71d1098" />
+<img width="350" height="252" alt="4" src="https://github.com/user-attachments/assets/a2dc9882-e700-4426-a4d6-493037577459" />
 
 
 ### 🔷 Download Executable (Recommended)
