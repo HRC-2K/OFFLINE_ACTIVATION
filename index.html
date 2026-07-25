@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HRC Offline Utility Tool v2.0</title>
+  <title>HRC Offline Utility Tool & Activation Manager</title>
   <style>
     :root {
       --bg: #0f0f12;
@@ -13,6 +13,7 @@
       --text: #f3f4f6;
       --muted: #9ca3af;
       --border: #27272a;
+      --code-bg: #000000;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,7 +26,7 @@
     }
 
     .container {
-      max-width: 900px;
+      max-width: 960px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -38,14 +39,16 @@
 
     h1 {
       font-family: 'Segoe Script', cursive, sans-serif;
-      font-size: 2.5rem;
+      font-size: 2.6rem;
       color: var(--accent);
       margin-bottom: 10px;
     }
 
     p.subtitle {
       color: var(--muted);
-      font-size: 1.1rem;
+      font-size: 1.15rem;
+      max-width: 750px;
+      margin: 0 auto;
     }
 
     .btn-group {
@@ -53,6 +56,7 @@
       justify-content: center;
       gap: 15px;
       margin-top: 25px;
+      flex-wrap: wrap;
     }
 
     .btn {
@@ -61,6 +65,7 @@
       text-decoration: none;
       font-weight: bold;
       transition: opacity 0.2s;
+      display: inline-block;
     }
 
     .btn-primary { background-color: var(--accent-green); color: white; }
@@ -68,7 +73,7 @@
     .btn:hover { opacity: 0.9; }
 
     section {
-      margin: 40px 0;
+      margin: 35px 0;
       background: var(--card-bg);
       padding: 25px;
       border-radius: 12px;
@@ -79,26 +84,64 @@
       font-size: 1.4rem;
       color: var(--accent);
       margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    ul { margin-left: 20px; color: var(--muted); }
+    p, ul, ol { color: var(--muted); }
+    ul, ol { margin-left: 20px; }
     li { margin-bottom: 8px; }
 
     .code-block {
-      background: #000;
+      background: var(--code-bg);
       padding: 15px;
-      border-radius: 6px;
-      font-family: monospace;
+      border-radius: 8px;
+      font-family: 'Cascadia Code', Consolas, monospace;
       color: #10b981;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       overflow-x: auto;
+      border: 1px solid var(--border);
+      margin: 10px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      color: var(--text);
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background-color: #141417;
+      color: var(--accent);
+      font-size: 0.95rem;
+    }
+
+    td { font-size: 0.9rem; color: var(--muted); }
+    td strong { color: var(--text); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
     }
 
     footer {
       text-align: center;
       color: var(--muted);
       font-size: 0.85rem;
-      padding: 20px 0;
+      padding: 30px 0 10px;
       border-top: 1px solid var(--border);
     }
   </style>
@@ -107,44 +150,143 @@
   <div class="container">
     <header>
       <h1>HRC Offline Utility Tool</h1>
-      <p class="subtitle">Standalone Windows GUI manager for game scripts, utility launchers, and offline isolation.</p>
+      <p class="subtitle">An all-in-one Windows automation toolkit & standalone GUI manager for offline gaming, silent software deployment, launcher isolation, and network rule automation.</p>
+      
       <div class="btn-group">
         <a class="btn btn-primary" href="https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/latest/download/HRC.Offline.Activation.Tool.zip">Download v2.0 Release</a>
-        <a class="btn btn-secondary" href="https://github.com/HRC-2K/OFFLINE_ACTIVATION" target="_blank">View on GitHub</a>
+        <a class="btn btn-secondary" href="https://github.com/HRC-2K/OFFLINE_ACTIVATION" target="_blank">View GitHub Repo</a>
       </div>
     </header>
 
+    <!-- Quick Start Section -->
     <section>
-      <h2>⚡ Quick Start Guide</h2>
-      <ol style="margin-left: 20px; color: var(--muted);">
-        <li>Download <code>HRC_Offline_Utility_Tool_v2.0.zip</code> from GitHub releases.</li>
-        <li>Extract the archive and launch <code>OAT.exe</code>.</li>
-        <li>Select your preferred download/portable directory using <b>Browse...</b></li>
-        <li>Choose any script or launcher and click <b>Run Selected</b>.</li>
+      <h2>⚡ Quick Start</h2>
+      
+      <h3 style="color: var(--text); font-size: 1.1rem; margin: 15px 0 5px;">Option A: GUI Manager Executable (Recommended)</h3>
+      <ol>
+        <li>Click <b>Download v2.0 Release</b> above to get <code>HRC.Offline.Activation.Tool.zip</code>.</li>
+        <li>Extract the archive and run <code>OAT.exe</code>.</li>
+        <li>Select your preferred directory using <b>Browse...</b> (saved automatically).</li>
+        <li>Choose any tool or script and click <b>Run Selected</b> or <b>Download</b>.</li>
       </ol>
-    </section>
 
-    <section>
-      <h2>✨ Key Features in v2.0</h2>
-      <ul>
-        <li><b>Hybrid Script Execution:</b> Runs local <code>.ps1</code> scripts offline or streams the latest version directly from GitHub when connected.</li>
-        <li><b>Persistent Configurations:</b> Automatically stores download paths inside <code>config.json</code>.</li>
-        <li><b>Smart Registry Detection:</b> Detects installed launchers across standard paths and custom drives (<code>C:</code> through <code>Z:</code>).</li>
-        <li><b>Dark Gamer UI:</b> Styled layout designed with Segoe typography, expanded list boxes, and real-time logging.</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>🔒 Verification & Hashes</h2>
-      <p style="color: var(--muted); margin-bottom: 10px;">To verify file integrity, compare SHA-256 hashes against your local download:</p>
+      <h3 style="color: var(--text); font-size: 1.1rem; margin: 20px 0 5px;">Option B: Pure PowerShell Version</h3>
+      <p>Run the master menu directly from PowerShell (No installation needed):</p>
       <div class="code-block">
-        HRC.Offline.Activation.Tool.zip : 7e2e746a78e5a458155e5e8927447...<br />
-        HRC.Offline.Activation.Tool.7z  : 646b38d6828a3b5ec1660dc87e194...
+        irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/menu_ps.ps1" | iex
+      </div>
+      <p style="font-size: 0.85rem;">📌 <i>Note: Administrator privileges are required to manage firewall rules, network adapters, and silent installers.</i></p>
+    </section>
+
+    <!-- Core Features Section -->
+    <section>
+      <h2>✨ Key Features & Modules</h2>
+      <div class="grid-2">
+        <div>
+          <h3 style="color: var(--text); font-size: 1rem; margin-bottom: 8px;">🎮 Offline Gaming Tools</h3>
+          <ul>
+            <li><b>Multi-Launcher Isolator:</b> Scans drives <code>C:</code>–<code>Z:</code> and blocks network access for Steam, Ubisoft, Epic, and Rockstar while keeping your PC online.</li>
+            <li><b>EA Adapter Offline Tool:</b> Temporarily toggles network adapters for genuine offline launch in the EA App.</li>
+            <li><b>Custom Directory Blocker:</b> Creates firewall rules for all <code>.exe</code> files inside any chosen folder.</li>
+            <li><b>One-Click Unblocker:</b> Instantly restores full network access for all blocked launchers.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="color: var(--text); font-size: 1rem; margin-bottom: 8px;">🛠️ Silent Installer & Upgrader</h3>
+          <ul>
+            <li><b>Chris Titus Tech Utility:</b> One-click launch for Windows tweaks.</li>
+            <li><b>Gaming Launchers:</b> Steam, Ubisoft Connect, Epic Games, Rockstar, EA App.</li>
+            <li><b>Core Utilities:</b> UltraViewer, Cloudflare WARP 1.1.1.1, FAB (Firewall App Blocker), TcNo Account Switcher, Bulk Crap Uninstaller.</li>
+            <li><b>Batch Downloader:</b> Download multiple applications simultaneously.</li>
+          </ul>
+        </div>
       </div>
     </section>
 
+    <!-- Detailed Modules Table -->
+    <section>
+      <h2>🛠️ Included Tools & Detection Engine</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Utility / Launcher</th>
+            <th>Detection Method</th>
+            <th>Supported Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Chris Titus Tech Windows Utility</strong></td>
+            <td>Direct PowerShell In-Memory Stream</td>
+            <td>Run / Open</td>
+          </tr>
+          <tr>
+            <td><strong>UltraViewer & Cloudflare WARP</strong></td>
+            <td>Registry Scan + Fixed Directory Check</td>
+            <td>Run / Download</td>
+          </tr>
+          <tr>
+            <td><strong>Firewall App Blocker (FAB)</strong></td>
+            <td>Recursive Search (<code>Fab_x64.exe</code>)</td>
+            <td>Run / Download</td>
+          </tr>
+          <tr>
+            <td><strong>Gaming Launchers (Steam, Ubi, Epic, Rockstar, EA)</strong></td>
+            <td>Multi-Drive Registry + Directory Scan (<code>C:</code>–<code>Z:</code>)</td>
+            <td>Run / Download</td>
+          </tr>
+          <tr>
+            <td><strong>TcNo Account Switcher</strong></td>
+            <td>Registry + AppData + Process Filtering</td>
+            <td>Run / Download</td>
+          </tr>
+          <tr>
+            <td><strong>Bulk Crap Uninstaller (BCU)</strong></td>
+            <td>Registry + Portable Directory Check</td>
+            <td>Run / Download</td>
+          </tr>
+          <tr>
+            <td><strong>Helper Scripts (<code>AI1G</code>, <code>EAOMG</code>, <code>SUERG</code>)</strong></td>
+            <td>Local Disk Check ➔ GitHub Stream Fallback</td>
+            <td>Run / Download</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Philosophy -->
+    <section>
+      <h2>🔒 Philosophy: Digital Ownership & Control</h2>
+      <p>Modern launchers often demand persistent internet connections, background updates, and telemetry collection even for offline single-player games. This project aims to:</p>
+      <ul style="margin-top: 10px;">
+        <li>🎮 Simplify launching games completely offline.</li>
+        <li>🔒 Eliminate background telemetry and launcher updates.</li>
+        <li>⚡ Automate complex Windows Firewall & network adapter workflows.</li>
+        <li>📦 Keep software lightweight, transparent, and user-controlled.</li>
+      </ul>
+    </section>
+
+    <!-- Security & Checksums -->
+    <section>
+      <h2>🛡️ Security & Verification</h2>
+      <p>All source code is fully open-source and visible in the public GitHub repository for complete peer review.</p>
+      
+      <h3 style="color: var(--text); font-size: 1rem; margin: 15px 0 5px;">Release Checksums (SHA-256)</h3>
+      <div class="code-block">
+HRC.Offline.Activation.Tool.zip : 7e2e746a78e5a458155e5e89274476f7bef8f3bf4dca254e9e7aca23b0842c40<br />
+HRC.Offline.Activation.Tool.7z  : 646b38d6828a3b5ec1660dc87e1947c694fd68b6be2def069154f763c5067e05
+      </div>
+    </section>
+
+    <!-- Requirements & Disclaimer -->
+    <section>
+      <h2>📋 System Requirements & Disclaimer</h2>
+      <p style="margin-bottom: 10px;"><b>Requirements:</b> Windows 10 / 11 (64-bit) &bull; Administrator Privileges &bull; PowerShell 5.1+</p>
+      <p style="font-size: 0.85rem; color: #6b7280;"><i>Disclaimer: This project is strictly intended for managing offline gaming workflows, launcher network isolation, and deploying software from official sources. It does not encourage or support software piracy, cracked software, or unauthorized modifications.</i></p>
+    </section>
+
     <footer>
-      <p>Developer: HRC-2K &bull; Copyright &copy; 2026 HRC-2K. All rights reserved.</p>
+      <p>Developer: <b>HRC-2K</b> &bull; Copyright &copy; 2026 HRC-2K. All rights reserved.</p>
     </footer>
   </div>
 </body>
