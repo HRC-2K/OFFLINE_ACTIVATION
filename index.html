@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HRC Offline Utility Tool v2.0</title>
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --card-bg: #18181c;
+      --accent: #3b82f6;
+      --accent-green: #059669;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --border: #27272a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 0 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      font-family: 'Segoe Script', cursive, sans-serif;
+      font-size: 2.5rem;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    p.subtitle {
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary { background-color: var(--accent-green); color: white; }
+    .btn-secondary { background-color: var(--card-bg); color: var(--text); border: 1px solid var(--border); }
+    .btn:hover { opacity: 0.9; }
+
+    section {
+      margin: 40px 0;
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      color: var(--accent);
+      margin-bottom: 15px;
+    }
+
+    ul { margin-left: 20px; color: var(--muted); }
+    li { margin-bottom: 8px; }
+
+    .code-block {
+      background: #000;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: monospace;
+      color: #10b981;
+      font-size: 0.9rem;
+      overflow-x: auto;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 20px 0;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>HRC Offline Utility Tool</h1>
+      <p class="subtitle">Standalone Windows GUI manager for game scripts, utility launchers, and offline isolation.</p>
+      <div class="btn-group">
+        <a class="btn btn-primary" href="https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/tag/v2.0" target="_blank">Download v2.0 Release</a>
+        <a class="btn btn-secondary" href="https://github.com/HRC-2K/OFFLINE_ACTIVATION" target="_blank">View on GitHub</a>
+      </div>
+    </header>
+
+    <section>
+      <h2>⚡ Quick Start Guide</h2>
+      <ol style="margin-left: 20px; color: var(--muted);">
+        <li>Download <code>HRC_Offline_Utility_Tool_v2.0.zip</code> from GitHub releases.</li>
+        <li>Extract the archive and launch <code>OAT.exe</code>.</li>
+        <li>Select your preferred download/portable directory using <b>Browse...</b></li>
+        <li>Choose any script or launcher and click <b>Run Selected</b>.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>✨ Key Features in v2.0</h2>
+      <ul>
+        <li><b>Hybrid Script Execution:</b> Runs local <code>.ps1</code> scripts offline or streams the latest version directly from GitHub when connected.</li>
+        <li><b>Persistent Configurations:</b> Automatically stores download paths inside <code>config.json</code>.</li>
+        <li><b>Smart Registry Detection:</b> Detects installed launchers across standard paths and custom drives (<code>C:</code> through <code>Z:</code>).</li>
+        <li><b>Dark Gamer UI:</b> Styled layout designed with Segoe typography, expanded list boxes, and real-time logging.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>🔒 Verification & Hashes</h2>
+      <p style="color: var(--muted); margin-bottom: 10px;">To verify file integrity, compare SHA-256 hashes against your local download:</p>
+      <div class="code-block">
+        HRC.Offline.Activation.Tool.zip : 7e2e746a78e5a458155e5e8927447...<br />
+        HRC.Offline.Activation.Tool.7z  : 646b38d6828a3b5ec1660dc87e194...
+      </div>
+    </section>
+
+    <footer>
+      <p>Developer: HRC-2K &bull; Copyright &copy; 2026 HRC-2K. All rights reserved.</p>
+    </footer>
+  </div>
+</body>
+</html>
