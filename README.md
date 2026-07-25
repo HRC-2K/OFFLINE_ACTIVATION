@@ -8,11 +8,11 @@
 
 Run the script using the following PowerShell command:
 
-### 🔷 Pure PowerShell Version (Recommended)
+### 🔷 Pure PowerShell Version 
 ```powershell
 irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/menu_ps.ps1" | iex
 ```
-### 🔷 Download Executable / Script
+### 🔷 Download Executable (Recommended)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/HRC-2K/OFFLINE_ACTIVATION?style=for-the-badge&logo=github)](https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/latest)
 
 📌 Note: Administrator privileges are required to manage network adapters and Windows Firewall rules. The script will automatically request UAC elevation if launched without admin rights.
