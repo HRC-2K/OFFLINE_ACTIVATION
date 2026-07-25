@@ -12,8 +12,21 @@ Run the script using the following PowerShell command:
 ```powershell
 irm "https://raw.githubusercontent.com/HRC-2K/OFFLINE_ACTIVATION/main/menu_ps.ps1" | iex
 ```
+
+<img width="250" height="152" alt="1" src="https://github.com/user-attachments/assets/053d2243-c345-47d8-a591-6a239efed6ec" />
+<img width="250" height="152" alt="2" src="https://github.com/user-attachments/assets/03d8cfc1-e8e9-4765-a8d4-eea43b8ca776" />
+<img width="250" height="152" alt="3" src="https://github.com/user-attachments/assets/796bede0-d8c5-4c76-a0d6-424ea71d1098" />
+<img width="250" height="152" alt="4" src="https://github.com/user-attachments/assets/a2dc9882-e700-4426-a4d6-493037577459" />
+
+
 ### 🔷 Download Executable (Recommended)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/HRC-2K/OFFLINE_ACTIVATION?style=for-the-badge&logo=github)](https://github.com/HRC-2K/OFFLINE_ACTIVATION/releases/latest)
+
+<img width="560" height="528" alt="1" src="https://github.com/user-attachments/assets/aec1ffa4-813f-449c-8058-04e5ad850e5d" />
+<img width="560" height="528" alt="1 5" src="https://github.com/user-attachments/assets/e674f5e5-74d3-4935-948a-88ca24046a73" />
+
+<img width="560" height="528" alt="2" src="https://github.com/user-attachments/assets/0f1df90d-0a14-4f9f-94bb-c27912c1a9bf" />
+<img width="560" height="528" alt="3" src="https://github.com/user-attachments/assets/381b3c75-931c-4b47-bfcc-dcd186fc6f9d" />
 
 📌 Note: Administrator privileges are required to manage network adapters and Windows Firewall rules. The script will automatically request UAC elevation if launched without admin rights.
 
