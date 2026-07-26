@@ -1,3 +1,23 @@
+<!--
+    OFFLINE_ACTIVATION Documentation / README
+    Copyright (C) 2026 HRC-2K <https://github.com/HRC-2K/OFFLINE_ACTIVATION>
+
+    This documentation is part of the HRC Offline Activation project.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
 # 🛡️ OFFLINE ACTIVATION & UTILITY MANAGER
 
 > **An all-in-one Windows automation toolkit for offline gaming, silent software deployment, launcher management, network isolation, and firewall rule automation.**
@@ -88,8 +108,19 @@ Its goals are to:
 - 📦 Install commonly used gaming software quickly from official sources.
 - 🛠️ Keep everything lightweight, script-based, and easy to use.
 
-The objective is convenience, privacy, and giving users greater control over their own Windows gaming environment.
+### The objective is convenience, privacy, and giving users greater control over their own Windows gaming environment.
+---
 
+
+## 📄 License & Copyright
+
+This project is open-source software licensed under the **GNU General Public License v3.0 (GPLv3)**.
+
+* **Developer:** HRC-2K
+* **Repository:** [GitHub - HRC-2K/OFFLINE_ACTIVATION](https://github.com/HRC-2K/OFFLINE_ACTIVATION)
+* **Full License Text:** See the [`LICENSE`](./LICENSE) file in the repository root for details.
+
+*Copyright (c) 2026 HRC-2K. All rights reserved.*
 
 ## ⚠️ Disclaimer
 
