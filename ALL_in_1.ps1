@@ -1,5 +1,5 @@
 <#
-    ALL_in_1.ps1 - All-In-One Offline Manager (Powershell)
+    ALL_in_1.ps1 - All-In-One Offline Manager (Powershell Interactive Menu)
     Copyright (C) 2026 HRC-2K <https://github.com/HRC-2K/OFFLINE_ACTIVATION>
 
     This program is free software: you can redistribute it and/or modify
@@ -10,10 +10,10 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+    GNU General Public License v3 (GPLv3) for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    along with this program.  If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
 #>
 
 
