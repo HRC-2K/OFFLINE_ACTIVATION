@@ -1,5 +1,5 @@
 <#
-    Steam_Ubi_Epic_RStar.ps1 - Multi-Launcher Firewall Blocker (Powershell)
+    Steam_Ubi_Epic_RStar.ps1 - Multi-Launcher Firewall Blocker (Powershell Interactive Menu)
     Copyright (C) 2026 HRC-2K <https://github.com/HRC-2K/OFFLINE_ACTIVATION>
 
     This program is free software: you can redistribute it and/or modify
