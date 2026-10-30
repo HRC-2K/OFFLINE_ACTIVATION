@@ -120,7 +120,6 @@ This project is open-source software licensed under the **GNU General Public Lic
 * **Repository:** [GitHub - HRC-2K/OFFLINE_ACTIVATION](https://github.com/HRC-2K/OFFLINE_ACTIVATION)
 * **Full License Text:** See the [`LICENSE`](./LICENSE) file in the repository root for details.
 
-* **Co-authored-by:** Gemini <gemini@google.com>
 
 *Copyright (c) 2026 HRC-2K. All rights reserved.*
 
